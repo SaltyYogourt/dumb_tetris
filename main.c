@@ -42,29 +42,38 @@ typedef struct {
     unsigned char x;
     unsigned char y;
     unsigned char rot;
-    unsigned char tetrominoIdx;
+    PieceData tetromino;
+    //unsigned char tetrominoIdx;
     char move_x;
     bool move_y;
-} Tetromino;
+} Player;
 
 typedef struct {
     unsigned char board[BOARD_HEIGHT][BOARD_WIDTH];
     Uint64 last_tick;
-    Tetromino player;
+    PieceData piece_data[7];
+    Player player;
 } GameState;
-
-PieceData tetrominos[7] = { {{64,255,64}}, {{-1,0}}, {{1,0}}, {{2,0}} };
 
 void init_tetrominos(PieceData *t){
     PieceData I, O, T, J, L, S, Z; 
 
     //declare I
-    I.color.r = 64; I.color.b = 255; I.color.b = 64;
+    I.color.r = 64; I.color.g = 64; I.color.b = 255;
     //I offsets
     memcpy( I.offset[0], (Point[]){ {-1,0}, {1,0}, {2,0} }, sizeof(Point[3]) ); //rot 0
     memcpy( I.offset[1], (Point[]){ {0,-1}, {0,1}, {0,2} }, sizeof(Point[3]) ); //rot 1
     memcpy( I.offset[2], I.offset[0], sizeof(Point[3]) ); //rot 2
     memcpy( I.offset[3], I.offset[1], sizeof(Point[3]) ); //rot 3
+
+    O.color.r = 255; O.color.g = 165; O.color.b = 0; 
+
+    memcpy( O.offset[0], (Point[]){ {1,0}, {0,1}, {1,1} },  sizeof(Point[3]) );
+    memcpy( O.offset[1], O.offset[0], sizeof(Point[3])); 
+    memcpy( O.offset[2], O.offset[0], sizeof(Point[3]));
+    memcpy( O.offset[3], O.offset[0], sizeof(Point[3])); //it's a fucking square.
+
+    t[0] = I; t[1] = O;
 }
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -75,12 +84,13 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     //Character *chara = SDL_calloc(1, sizeof(Character));
     *appstate = gamestate;
     
-    Tetromino *player = &gamestate->player;
+    Player *player = &gamestate->player;
     SDL_memset(gamestate->board, T_EMPTY, sizeof(gamestate->board[0][0])*BOARD_HEIGHT*BOARD_WIDTH);
 
+    init_tetrominos(gamestate->piece_data);
     player->x = BOARD_WIDTH/2;
     player->y = 1;
-    player->tetrominoIdx = T_T; //lmao
+    player->tetromino = gamestate->piece_data[0]; //lmao. should this data be duplicateD? just get it working for now.
     
     gamestate->board[19][5] = 2;
     SDL_SetRenderVSync(renderer, 1);
@@ -119,7 +129,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 void update_game(GameState *gamestate)
 {
     //move player
-    Tetromino *player = &gamestate->player;
+    Player *player = &gamestate->player;
     unsigned char *block;
     unsigned char player_block;
     int i,j;
@@ -136,31 +146,6 @@ void update_game(GameState *gamestate)
         }
     }
 
-
-    for(i = 0; 4 > i; i++){ //a tetromino will never be anything but 4x4, right?
-        for(j = 0; 4 > j; j++)
-        {
-            block = &gamestate->board[i+player->y][j+player->x];
-            player_block = tetrominos[player->tetrominoIdx][i][j];
-            //dirty hack so we don't darw over shit
-            //making sure we don't render out of bounds
-            //skipping any empty blocks so we don't even try to draw them.
-            
-            //check if there's shit below us or we're at the bottom, stop
-            if (player_block == T_PLAYER && (19 < player->y+i+1 || gamestate->board[1+i+player->y][j+player->x] > 1)){
-                player->move_y = false;
-            }
-
-            //check surroundings
-            //if(){}
-
-            if (0 > player->y+i || 19 < player->y+i || *block > 1 || player_block == T_EMPTY)  continue;
-            //Boy I'm happy no one has to maintain this shit.
-            //oh wait, I do.
-            
-            *block = player_block;
-            }
-        }
 
     if(player->move_y) player->y++;
 }
@@ -186,6 +171,17 @@ void draw_board(GameState *gamestate)
             SDL_RenderFillRect(renderer,&rect);
         }
     }
+    
+    SDL_Color player_color = gamestate->player.tetromino.color;
+    SDL_SetRenderDrawColor(renderer, player_color.r, player_color.g, player_color.b, SDL_ALPHA_OPAQUE);
+    rect.x = gamestate->player.x*CELL_SIZE;
+    rect.y = gamestate->player.y*CELL_SIZE;
+    SDL_RenderFillRect(renderer,&rect);
+    for(i=0; 3 > i; ++i){
+        rect.x = (gamestate->player.x+gamestate->player.tetromino.offset[0][i].x)*CELL_SIZE;
+        rect.y = (gamestate->player.y+gamestate->player.tetromino.offset[0][i].y)*CELL_SIZE;
+        SDL_RenderFillRect(renderer,&rect);
+    }
     SDL_RenderPresent(renderer);
 }
 
@@ -196,6 +192,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     draw_board(gamestate);
     //SDL_Log("%I64d\n", ticks);
     while((ticks - gamestate->last_tick) >= TICKRATE){
+        SDL_Log("%d,%d\n", gamestate->player.tetromino.offset[0][0].x,gamestate->player.tetromino.offset[0][0].y);
         update_game(gamestate);
         gamestate->last_tick += TICKRATE;
     }
