@@ -41,7 +41,7 @@ typedef struct {
 typedef struct {
     unsigned char x;
     unsigned char y;
-    unsigned char rot;
+    char rot;
     PieceData tetromino;
     //unsigned char tetrominoIdx;
     char move_x;
@@ -58,9 +58,8 @@ typedef struct {
 void init_tetrominos(PieceData *t){
     PieceData I, O, T, J, L, S, Z; 
 
-    //declare I
     I.color.r = 64; I.color.g = 64; I.color.b = 255;
-    //I offsets
+
     memcpy( I.offset[0], (Point[]){ {-1,0}, {1,0}, {2,0} }, sizeof(Point[3]) ); //rot 0
     memcpy( I.offset[1], (Point[]){ {0,-1}, {0,1}, {0,2} }, sizeof(Point[3]) ); //rot 1
     memcpy( I.offset[2], I.offset[0], sizeof(Point[3]) ); //rot 2
@@ -73,7 +72,14 @@ void init_tetrominos(PieceData *t){
     memcpy( O.offset[2], O.offset[0], sizeof(Point[3]));
     memcpy( O.offset[3], O.offset[0], sizeof(Point[3])); //it's a fucking square.
 
-    t[0] = I; t[1] = O;
+
+    T.color.r = 224; T.color.b = 224; T.color.g = 0;
+
+    memcpy( T.offset[0], (Point[]){ {-1,0}, {1,0}, {0,-1} }, sizeof(Point[3]) ); //rot 0
+    memcpy( T.offset[1], (Point[]){ {0,1}, {0,-1}, {1,0} }, sizeof(Point[3]) ); //rot 3
+    memcpy( T.offset[2], (Point[]){ {-1,0}, {1,0}, {0,1} }, sizeof(Point[3]) ); //rot 2
+    memcpy( T.offset[3], (Point[]){ {0,1}, {0,-1}, {-1,0} }, sizeof(Point[3]) ); //rot 1
+    t[0] = I; t[1] = O; t[2] = T;
 }
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -90,7 +96,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     init_tetrominos(gamestate->piece_data);
     player->x = BOARD_WIDTH/2;
     player->y = 1;
-    player->tetromino = gamestate->piece_data[0]; //lmao. should this data be duplicateD? just get it working for now.
+    player->rot = 0;
+    player->tetromino = gamestate->piece_data[2]; //lmao. should this data be duplicateD? just get it working for now. we can cast it to a pointer later.
     
     gamestate->board[19][5] = 2;
     SDL_SetRenderVSync(renderer, 1);
@@ -114,6 +121,9 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
     if (event->type == SDL_EVENT_QUIT) {
         return SDL_APP_SUCCESS;  
     }
+    //TODO: EVENT HANDLING SHOULD NOT UPDATE THE GAMESTATE!
+    //probably best to inform the game it has to do an action(s) on each tick/frame.
+    //we should also avoid only polling for game inputs ever n ticks. that would be annoying to the player
     if (event->type == SDL_EVENT_KEY_DOWN){
         if (event->key.scancode == SDL_SCANCODE_D){
            ((GameState *)appstate)->player.x += 1;
@@ -121,33 +131,48 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         else if (event->key.scancode == SDL_SCANCODE_A){
            ((GameState *)appstate)->player.x -= 1;
         }
+        else if (event->key.scancode == SDL_SCANCODE_W){
+           if (++((GameState *)appstate)->player.rot > 3) ((GameState *)appstate)->player.rot = 0;
+        }
+        else if (event->key.scancode == SDL_SCANCODE_S){
+           if (--((GameState *)appstate)->player.rot < 0) ((GameState *)appstate)->player.rot = 3;
+        }
+        SDL_Log("%d\n", ((GameState*)appstate)->player.rot);
     }
     return SDL_APP_CONTINUE;  
 }
 
+void get_abs_offsets(Player *player, Point *points){
+    points[0].x = player->x;
+    points[0].y = player->y;
+    unsigned char rot = player->rot;
+    for(int i = 0; 3 > i; ++i){ // fill the values
+        points[i+1].x = (player->x+player->tetromino.offset[rot][i].x);
+        points[i+1].y = (player->y+player->tetromino.offset[rot][i].y);
+    }
+}
 
 void update_game(GameState *gamestate)
 {
     //move player
     Player *player = &gamestate->player;
     unsigned char *block;
-    unsigned char player_block;
+    Point *offsets = player->tetromino.offset[player->rot];
     int i,j;
     player->move_y = true;
     SDL_Log("Player Y: %d\n", player->y);
-
     for(i = 0; BOARD_HEIGHT > i; i++){
         for(j = 0; BOARD_WIDTH > j; j++)
         {
-
             block = &gamestate->board[i][j];
             if(*block == T_PLAYER) *block = T_EMPTY; //clear that shit out.
             //TODO: check for lines.
         }
     }
-
-
-    if(player->move_y) player->y++;
+    
+    //collision checking
+    
+    //if(player->move_y) player->y++;
 }
 
 void draw_board(GameState *gamestate)
@@ -177,9 +202,12 @@ void draw_board(GameState *gamestate)
     rect.x = gamestate->player.x*CELL_SIZE;
     rect.y = gamestate->player.y*CELL_SIZE;
     SDL_RenderFillRect(renderer,&rect);
-    for(i=0; 3 > i; ++i){
-        rect.x = (gamestate->player.x+gamestate->player.tetromino.offset[0][i].x)*CELL_SIZE;
-        rect.y = (gamestate->player.y+gamestate->player.tetromino.offset[0][i].y)*CELL_SIZE;
+    Point points_to_draw[4];
+    get_abs_offsets(&gamestate->player, points_to_draw);
+    for(i=0; 4 > i; ++i){
+        SDL_Log("x: %d, y: %d\n", points_to_draw[i].x, points_to_draw[i].y);
+        rect.x = points_to_draw[i].x*CELL_SIZE;
+        rect.y = points_to_draw[i].y*CELL_SIZE;
         SDL_RenderFillRect(renderer,&rect);
     }
     SDL_RenderPresent(renderer);
@@ -192,7 +220,6 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     draw_board(gamestate);
     //SDL_Log("%I64d\n", ticks);
     while((ticks - gamestate->last_tick) >= TICKRATE){
-        SDL_Log("%d,%d\n", gamestate->player.tetromino.offset[0][0].x,gamestate->player.tetromino.offset[0][0].y);
         update_game(gamestate);
         gamestate->last_tick += TICKRATE;
     }
