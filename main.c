@@ -24,6 +24,8 @@ enum {
     T_BOUND_LEFT  = ( 1 << 2 )
 };
 
+enum { T_MOVE_STILL, T_MOVE_RIGHT, T_MOVE_LEFT };
+
 int tetrominos_old[7][4][4] = {
     {{0,0,0,0},{1,1,1,1},{0,0,0,0},{0,0,0,0}}, // I
     {{0,0,0,0},{0,1,1,0},{0,1,1,0},{0,0,0,0}}, // O
@@ -51,7 +53,6 @@ typedef struct {
     PieceData tetromino;
     //unsigned char tetrominoIdx;
     char move_x;
-    bool move_y;
 } Player;
 
 typedef struct {
@@ -132,10 +133,12 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
     //we should also avoid only polling for game inputs ever n ticks. that would be annoying to the player
     if (event->type == SDL_EVENT_KEY_DOWN){
         if (event->key.scancode == SDL_SCANCODE_D){
-           ((GameState *)appstate)->player.x += 1;
+           //((GameState *)appstate)->player.x += 1;
+           ((GameState *)appstate)->player.move_x = T_MOVE_RIGHT;
         }
         else if (event->key.scancode == SDL_SCANCODE_A){
-           ((GameState *)appstate)->player.x -= 1;
+           //((GameState *)appstate)->player.x -= 1;
+           ((GameState *)appstate)->player.move_x = T_MOVE_LEFT;
         }
         else if (event->key.scancode == SDL_SCANCODE_W){
            if (++((GameState *)appstate)->player.rot > 3) ((GameState *)appstate)->player.rot = 0;
@@ -163,21 +166,23 @@ unsigned char check_collision(GameState *gamestate){
     Point abs_points[4];
     get_abs_offsets(player, abs_points); 
     unsigned char collision_flag = 0;
-    for(int i = 0; 4 > 1; ++i){
-       if(abs_points[i].x+1 > BOARD_WIDTH-1)
-           collision_flag |= T_BOUND_RIGHT;
-       else if(gamestate->board[abs_points[i].y][abs_points[i].x+1] != 0)
-           collision_flag |= T_BOUND_RIGHT;
+    for(int i = 0; 4 > i; ++i){
 
+        if(abs_points[i].x+1 > BOARD_WIDTH-1)
+            collision_flag |= T_BOUND_RIGHT;
+        else if(gamestate->board[abs_points[i].y][abs_points[i].x+1] != 0)
+            collision_flag |= T_BOUND_RIGHT;
 
-       if(abs_points[i].x-1 < 0)
-           collision_flag |= T_BOUND_LEFT;
-       else if(gamestate->board[abs_points[i].y][abs_points[i].x-1] != 0)
-           collision_flag |= T_BOUND_LEFT;
+        if(abs_points[i].x-1 < 0)
+            collision_flag |= T_BOUND_LEFT;
+        else if(gamestate->board[abs_points[i].y][abs_points[i].x-1] != 0)
+            collision_flag |= T_BOUND_LEFT;
 
-       if(abs_points[i].y+1 > BOARD_HEIGHT-1)
-           collision_flag |= T_BOUND_BELOW;
-    }
+        if(abs_points[i].y+1 > BOARD_HEIGHT-1)
+            collision_flag |= T_BOUND_BELOW;
+        else if(gamestate->board[abs_points[i].y+1][abs_points[i].x] != 0)
+            collision_flag |= T_BOUND_BELOW;
+        }
     return collision_flag;
 }
 
@@ -189,7 +194,6 @@ void update_game(GameState *gamestate)
     Point offsets[4];  
     get_abs_offsets(player, offsets); 
     int i,j;
-    player->move_y = true;
     SDL_Log("Player Y: %d\n", player->y);
     for(i = 0; BOARD_HEIGHT > i; i++){
         for(j = 0; BOARD_WIDTH > j; j++)
@@ -204,6 +208,14 @@ void update_game(GameState *gamestate)
     unsigned char collision = check_collision(gamestate);
     
     if( !(collision & T_BOUND_BELOW)) player->y++;
+
+    //handle movement
+    if ( gamestate->player.move_x == T_MOVE_RIGHT && !(collision & T_BOUND_RIGHT) )
+        player->x++;
+    else if ( gamestate->player.move_x == T_MOVE_LEFT && !(collision & T_BOUND_LEFT) )
+        player->x--;
+
+    gamestate->player.move_x = T_MOVE_STILL;
 }
 
 void draw_board(GameState *gamestate)
@@ -236,7 +248,7 @@ void draw_board(GameState *gamestate)
     Point points_to_draw[4];
     get_abs_offsets(&gamestate->player, points_to_draw);
     for(i=0; 4 > i; ++i){
-        SDL_Log("x: %d, y: %d\n", points_to_draw[i].x, points_to_draw[i].y);
+        //SDL_Log("x: %d, y: %d\n", points_to_draw[i].x, points_to_draw[i].y);
         rect.x = points_to_draw[i].x*CELL_SIZE;
         rect.y = points_to_draw[i].y*CELL_SIZE;
         SDL_RenderFillRect(renderer,&rect);
