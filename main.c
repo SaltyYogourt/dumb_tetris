@@ -18,6 +18,12 @@ static SDL_Renderer *renderer = NULL;
 enum { T_EMPTY, T_PLAYER, T_BLOCK };
 enum { T_I, T_O, T_T, T_J, T_L, T_S, T_Z };
 
+enum { 
+    T_BOUND_BELOW = ( 1 << 0 ),
+    T_BOUND_RIGHT = ( 1 << 1 ), //whether we're checking if there's a block or a wall to our right, we're colliding to the right.
+    T_BOUND_LEFT  = ( 1 << 2 )
+};
+
 int tetrominos_old[7][4][4] = {
     {{0,0,0,0},{1,1,1,1},{0,0,0,0},{0,0,0,0}}, // I
     {{0,0,0,0},{0,1,1,0},{0,1,1,0},{0,0,0,0}}, // O
@@ -152,12 +158,36 @@ void get_abs_offsets(Player *player, Point *points){
     }
 }
 
+unsigned char check_collision(GameState *gamestate){
+    Player *player = &gamestate->player;
+    Point abs_points[4];
+    get_abs_offsets(player, abs_points); 
+    unsigned char collision_flag = 0;
+    for(int i = 0; 4 > 1; ++i){
+       if(abs_points[i].x+1 > BOARD_WIDTH-1)
+           collision_flag |= T_BOUND_RIGHT;
+       else if(gamestate->board[abs_points[i].y][abs_points[i].x+1] != 0)
+           collision_flag |= T_BOUND_RIGHT;
+
+
+       if(abs_points[i].x-1 < 0)
+           collision_flag |= T_BOUND_LEFT;
+       else if(gamestate->board[abs_points[i].y][abs_points[i].x-1] != 0)
+           collision_flag |= T_BOUND_LEFT;
+
+       if(abs_points[i].y+1 > BOARD_HEIGHT-1)
+           collision_flag |= T_BOUND_BELOW;
+    }
+    return collision_flag;
+}
+
 void update_game(GameState *gamestate)
 {
     //move player
     Player *player = &gamestate->player;
     unsigned char *block;
-    Point *offsets = player->tetromino.offset[player->rot];
+    Point offsets[4];  
+    get_abs_offsets(player, offsets); 
     int i,j;
     player->move_y = true;
     SDL_Log("Player Y: %d\n", player->y);
@@ -171,8 +201,9 @@ void update_game(GameState *gamestate)
     }
     
     //collision checking
+    unsigned char collision = check_collision(gamestate);
     
-    //if(player->move_y) player->y++;
+    if( !(collision & T_BOUND_BELOW)) player->y++;
 }
 
 void draw_board(GameState *gamestate)
