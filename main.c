@@ -19,9 +19,10 @@ enum { T_EMPTY, T_PLAYER, T_BLOCK };
 enum { T_I, T_O, T_T, T_J, T_L, T_S, T_Z };
 
 enum { 
-    T_BOUND_BELOW = ( 1 << 0 ),
-    T_BOUND_RIGHT = ( 1 << 1 ), //whether we're checking if there's a block or a wall to our right, we're colliding to the right.
-    T_BOUND_LEFT  = ( 1 << 2 )
+    T_BOUND_BELOW   = ( 1 << 0 ),
+    T_BOUND_RIGHT   = ( 1 << 1 ), //whether we're checking if there's a block or a wall to our right, we're colliding to the right.
+    T_BOUND_LEFT    = ( 1 << 2 ),
+    T_BOUND_OVERLAP = ( 1 << 3 ),
 };
 
 enum { T_MOVE_STILL, T_MOVE_RIGHT, T_MOVE_LEFT };
@@ -43,6 +44,7 @@ typedef struct {
     PieceData *tetromino;
     //unsigned char tetrominoIdx;
     char move_x;
+    char rot_dir;
     char rotation;
 } Player;
 
@@ -137,13 +139,13 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         }
         else if (event->key.scancode == SDL_SCANCODE_W){
            //if (++((GameState *)appstate)->player.rot > 3) ((GameState *)appstate)->player.rot = 0;
-           ((GameState *)appstate)->player.rot = 1
+           ((GameState *)appstate)->player.rot_dir = 1;
         }
         else if (event->key.scancode == SDL_SCANCODE_S){
            //if (--((GameState *)appstate)->player.rot < 0) ((GameState *)appstate)->player.rot = 3;
-           ((GameState *)appstate)->player.rot = -1
+           ((GameState *)appstate)->player.rot_dir = -1;
         }
-        SDL_Log("%d\n", ((GameState*)appstate)->player.rot);
+        //SDL_Log("%d\n", ((GameState*)appstate)->player.rot);
     }
     return SDL_APP_CONTINUE;  
 }
@@ -159,10 +161,11 @@ void get_abs_offsets(Player *player, unsigned char rot, Point *points){
     }
 }
 
-unsigned char check_collision(GameState *gamestate){
+unsigned char check_collision(GameState *gamestate, int rot){
     Player *player = &gamestate->player;
     Point abs_points[4];
-    get_abs_offsets(player, player->rot, abs_points); 
+    //get_abs_offsets(player, player->rot, abs_points); 
+    get_abs_offsets(player, rot, abs_points); 
     unsigned char collision_flag = 0;
     for(int i = 0; 4 > i; ++i){
 
@@ -180,7 +183,16 @@ unsigned char check_collision(GameState *gamestate){
             collision_flag |= T_BOUND_BELOW;
         else if(gamestate->board[abs_points[i].y+1][abs_points[i].x] != 0)
             collision_flag |= T_BOUND_BELOW;
+
+        if(abs_points[i].x < BOARD_WIDTH && abs_points[i].x > 0 && abs_points[i].y < BOARD_HEIGHT) { //don't shoot ourselves in the foot indexing OOB
+            //SDL_Log("%d,%d val: %d", abs_points[i].x, abs_points[i].y, gamestate->board[abs_points[i].y][abs_points[i].x]);
+            int tile = gamestate->board[abs_points[i].y][abs_points[i].x];
+            //if(gamestate->board[abs_points[i].y][abs_points[i].x] != 0)
+            if(tile != 0)
+                collision_flag |= T_BOUND_OVERLAP;
+            }
         }
+
     return collision_flag;
 }
 
@@ -203,18 +215,33 @@ void update_game(GameState *gamestate)
     }
     
     //collision checking
-    unsigned char collision = check_collision(gamestate);
+    unsigned char collision = check_collision(gamestate, player->rot);
     
     if( !(collision & T_BOUND_BELOW)) player->y++;
 
     //handle movement
-    if ( gamestate->player.move_x == T_MOVE_RIGHT && !(collision & T_BOUND_RIGHT) )
+    if ( player->move_x == T_MOVE_RIGHT && !(collision & T_BOUND_RIGHT) )
         player->x++;
-    else if ( gamestate->player.move_x == T_MOVE_LEFT && !(collision & T_BOUND_LEFT) )
+    else if ( player->move_x == T_MOVE_LEFT && !(collision & T_BOUND_LEFT) )
         player->x--;
 
-    
     gamestate->player.move_x = T_MOVE_STILL;
+
+    //handle rotation
+    if (player->rot_dir) {
+        int new_rot = player->rot+player->rot_dir;
+       
+        if (new_rot > 3) new_rot = 0;
+        else if (new_rot < 0) new_rot = 3; 
+
+        //unsigned char virt_collision = check_collision(gamestate, new_rot);
+
+        while (check_collision(gamestate, new_rot) & T_BOUND_OVERLAP){
+            player->y--;
+        }
+        player->rot_dir = 0;
+        player->rot = new_rot;
+    }
 }
 
 void draw_board(GameState *gamestate)
