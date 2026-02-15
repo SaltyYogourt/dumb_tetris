@@ -52,12 +52,12 @@ unsigned char check_collision(GameState *gamestate, int rot){
     for(int i = 0; 4 > i; ++i){
 
         if(abs_points[i].x+1 > BOARD_WIDTH-1)
-            collision_flag |= T_BOUND_RIGHT;
+            collision_flag |= T_BOUND_RIGHT_WALL;
         else if(gamestate->board[abs_points[i].y][abs_points[i].x+1] != 0)
             collision_flag |= T_BOUND_RIGHT;
 
         if(abs_points[i].x-1 < 0)
-            collision_flag |= T_BOUND_LEFT;
+            collision_flag |= T_BOUND_LEFT_WALL;
         else if(gamestate->board[abs_points[i].y][abs_points[i].x-1] != 0)
             collision_flag |= T_BOUND_LEFT;
 
@@ -67,9 +67,7 @@ unsigned char check_collision(GameState *gamestate, int rot){
             collision_flag |= T_BOUND_BELOW;
 
         if(abs_points[i].x < BOARD_WIDTH && abs_points[i].x > 0 && abs_points[i].y < BOARD_HEIGHT) { //don't shoot ourselves in the foot indexing OOB
-            //SDL_Log("%d,%d val: %d", abs_points[i].x, abs_points[i].y, gamestate->board[abs_points[i].y][abs_points[i].x]);
             int tile = gamestate->board[abs_points[i].y][abs_points[i].x];
-            //if(gamestate->board[abs_points[i].y][abs_points[i].x] != 0)
             if(tile != 0)
                 collision_flag |= T_BOUND_OVERLAP;
             }

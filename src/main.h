@@ -39,16 +39,20 @@ typedef struct {
     Uint64 last_tick;
     PieceData piece_data[7];
     Player player;
+    SDL_Window *window;
+    SDL_Renderer *renderer;
 } GameState;
 
 enum { T_EMPTY, T_PLAYER, T_BLOCK };
 enum { T_I, T_O, T_T, T_J, T_L, T_S, T_Z };
 
 enum { 
-    T_BOUND_BELOW   = ( 1 << 0 ),
-    T_BOUND_RIGHT   = ( 1 << 1 ), //whether we're checking if there's a block or a wall to our right, we're colliding to the right.
-    T_BOUND_LEFT    = ( 1 << 2 ),
-    T_BOUND_OVERLAP = ( 1 << 3 ),
+    T_BOUND_BELOW      = ( 1 << 0 ),
+    T_BOUND_RIGHT      = ( 1 << 1 ), //whether we're checking if there's a block or a wall to our right, we're colliding to the right.
+    T_BOUND_LEFT       = ( 1 << 2 ),
+    T_BOUND_OVERLAP    = ( 1 << 3 ),
+    T_BOUND_RIGHT_WALL = ( 1 << 4 ),
+    T_BOUND_LEFT_WALL  = ( 1 << 5 ),
 };
 
 enum { T_MOVE_STILL, T_MOVE_RIGHT, T_MOVE_LEFT };
