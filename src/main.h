@@ -20,7 +20,7 @@ typedef struct {
 
 typedef struct { 
     SDL_Color color;
-    Point offset[4][3]; //we ONLY have four offsets excluding 0,0, right? 
+    Point offset[4][4]; //we ONLY have four offsets including 0,0, right? 
 } PieceData;
 
 typedef struct {
@@ -53,6 +53,8 @@ enum {
     T_BOUND_OVERLAP    = ( 1 << 3 ),
     T_BOUND_RIGHT_WALL = ( 1 << 4 ),
     T_BOUND_LEFT_WALL  = ( 1 << 5 ),
+    T_BOUND_FLOOR      = ( 1 << 6 ),
+    T_BOUND_CEILING    = ( 1 << 7 ),
 };
 
 enum { T_MOVE_STILL, T_MOVE_RIGHT, T_MOVE_LEFT };
