@@ -26,12 +26,12 @@ typedef struct {
 typedef struct {
     unsigned char x;
     unsigned char y;
+    unsigned char tetromino_id;
     char rot;
-    PieceData *tetromino;
-    //unsigned char tetrominoIdx;
     char move_x;
     char rot_dir;
     char rotation;
+    PieceData *tetromino;
 } Player;
 
 typedef struct {

@@ -114,18 +114,7 @@ void update_game(GameState *gamestate)
         if (new_rot > 3) new_rot = 0;
         else if (new_rot < 0) new_rot = 3; 
 
-        while (check_collision(gamestate, new_rot) & (T_BOUND_OVERLAP | T_BOUND_FLOOR)){
-            player->y--;
-        }
-
-        while (check_collision(gamestate, new_rot) & T_BOUND_RIGHT_WALL){
-            player->x--;
-        }
-
-        while (check_collision(gamestate, new_rot) & T_BOUND_LEFT_WALL){
-            player->x++;
-        }
-
+         
         player->rot_dir = 0;
         player->rot = new_rot;
     }
