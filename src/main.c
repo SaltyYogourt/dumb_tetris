@@ -29,6 +29,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     player->rot = 0;
     //player->tetromino = &gamestate->piece_data[T_T]; //lmao. should this data be duplicateD? just get it working for now. we can cast it to a pointer later.
     player->tetromino = &gamestate->piece_data[tetromino_id]; //lmao. should this data be duplicateD? just get it working for now. we can cast it to a pointer later.
+    player->tetromino_id = tetromino_id;
     
     gamestate->board[19][5] = 2;
 
@@ -79,7 +80,7 @@ void update_game(GameState *gamestate)
     Player *player = &gamestate->player;
     unsigned char *block;
     Point offsets[4];  
-    get_abs_offsets(player, player->rot, offsets); 
+    get_abs_offsetsp(player, player->rot, offsets); 
     int i,j;
     for(i = 0; BOARD_HEIGHT > i; i++){
         for(j = 0; BOARD_WIDTH > j; j++)
@@ -90,7 +91,7 @@ void update_game(GameState *gamestate)
     }
     
     //collision checking
-    unsigned char collision = check_collision(gamestate, player->rot);
+    unsigned char collision = check_collisiong1(gamestate, player->rot);
     
     if ( !(collision & T_BOUND_BELOW) ) player->y++;
 
@@ -103,7 +104,7 @@ void update_game(GameState *gamestate)
     gamestate->player.move_x = T_MOVE_STILL;
 
     //check if we fucked up and ended up inside of a block; push us out. Hacky.
-    while (check_collision(gamestate,player-> rot) & T_BOUND_OVERLAP){
+    while (check_collisiong2(gamestate) & T_BOUND_OVERLAP){
         player->y--;
     }
 
@@ -114,20 +115,22 @@ void update_game(GameState *gamestate)
         if (new_rot > 3) new_rot = 0;
         else if (new_rot < 0) new_rot = 3; 
 
-        while (check_collision(gamestate, new_rot) & (T_BOUND_OVERLAP | T_BOUND_FLOOR)){
-            player->y--;
+        switch (check_rotation(gamestate, new_rot)) {
+                case ROT_INPLACE:
+                        player->rot = new_rot;
+                        break;
+                case ROT_KICK_RIGHT:
+                        player->rot = new_rot;
+                        player->x++;
+                        break;
+                case ROT_KICK_LEFT:
+                        player->rot = new_rot;
+                        player->x--;
+                        break;
+                case ROT_NOP:
+                        break;
         }
-
-        while (check_collision(gamestate, new_rot) & T_BOUND_RIGHT_WALL){
-            player->x--;
-        }
-
-        while (check_collision(gamestate, new_rot) & T_BOUND_LEFT_WALL){
-            player->x++;
-        }
-
         player->rot_dir = 0;
-        player->rot = new_rot;
     }
 }
 
@@ -154,7 +157,7 @@ void draw_board(GameState *gamestate)
     SDL_Color player_color = gamestate->player.tetromino->color;
     SDL_SetRenderDrawColor(gamestate->renderer, player_color.r, player_color.g, player_color.b, SDL_ALPHA_OPAQUE);
     Point points_to_draw[4];
-    get_abs_offsets(&gamestate->player, gamestate->player.rot, points_to_draw);
+    get_abs_offsetsp(&gamestate->player, gamestate->player.rot, points_to_draw);
 
     for(i=0; 4 > i; ++i){
         rect.x = points_to_draw[i].x*CELL_SIZE;
