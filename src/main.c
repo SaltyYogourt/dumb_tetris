@@ -29,6 +29,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     player->rot = 0;
     //player->tetromino = &gamestate->piece_data[T_T]; //lmao. should this data be duplicateD? just get it working for now. we can cast it to a pointer later.
     player->tetromino = &gamestate->piece_data[tetromino_id]; //lmao. should this data be duplicateD? just get it working for now. we can cast it to a pointer later.
+    player->tetromino_id = tetromino_id;
     
     gamestate->board[19][5] = 2;
 
@@ -103,7 +104,7 @@ void update_game(GameState *gamestate)
     gamestate->player.move_x = T_MOVE_STILL;
 
     //check if we fucked up and ended up inside of a block; push us out. Hacky.
-    while (check_collisiong1(gamestate,player-> rot) & T_BOUND_OVERLAP){
+    while (check_collisiong2(gamestate) & T_BOUND_OVERLAP){
         player->y--;
     }
 
@@ -114,9 +115,22 @@ void update_game(GameState *gamestate)
         if (new_rot > 3) new_rot = 0;
         else if (new_rot < 0) new_rot = 3; 
 
-         
+        switch (check_rotation(gamestate, new_rot)) {
+                case ROT_INPLACE:
+                        player->rot = new_rot;
+                        break;
+                case ROT_KICK_RIGHT:
+                        player->rot = new_rot;
+                        player->x++;
+                        break;
+                case ROT_KICK_LEFT:
+                        player->rot = new_rot;
+                        player->x--;
+                        break;
+                case ROT_NOP:
+                        break;
+        }
         player->rot_dir = 0;
-        player->rot = new_rot;
     }
 }
 

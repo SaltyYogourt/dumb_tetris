@@ -79,24 +79,22 @@ void get_abs_offsets(int x, int y, PieceData *tetromino, unsigned char rot, Poin
  * (center column rule, rotation fails)
  */
 unsigned char check_rotation(GameState *gamestate, char rot){
-    if (!(check_collisiong1(gamestate, rot ^ T_BOUND_OVERLAP))) return ROT_INPLACE;
+    if (!(check_collisiong1(gamestate, rot) & (T_BOUND_OVERLAP | T_BOUND_RIGHT_WALL | T_BOUND_LEFT_WALL))) return ROT_INPLACE;
     if (center_column_rule(gamestate, rot) || gamestate->player.tetromino_id == T_I) return ROT_NOP;
 
+    Player *player = &gamestate->player;
     //sliiiide to the right
-    gamestate->player.x++;
-    if (!(check_collisiong1(gamestate, rot) ^ (T_BOUND_OVERLAP | T_BOUND_RIGHT_WALL))) return ROT_KICK_RIGHT;
+    if (!(check_collision(player->x+1, player->y, player->tetromino, gamestate->board, rot) & (T_BOUND_OVERLAP | T_BOUND_RIGHT_WALL))) return ROT_KICK_RIGHT;
 
     //sliiiiiiide to the left...?
-    gamestate->player.x -= 2;
-    if (!(check_collisiong1(gamestate, rot) ^ (T_BOUND_OVERLAP | T_BOUND_LEFT_WALL))) return ROT_KICK_LEFT;
+    if (!(check_collision(player->x-1, player->y, player->tetromino, gamestate->board, rot) & (T_BOUND_OVERLAP | T_BOUND_RIGHT_WALL))) return ROT_KICK_LEFT;
 
     //well shit.
-    gamestate->player.x++;
     return ROT_NOP;
 }
 
 bool center_column_rule(GameState *gamestate, char rot){
-     if(!(check_collisiong1(gamestate, rot) ^ (T_BOUND_RIGHT_WALL | T_BOUND_LEFT_WALL))) return false;
+     if(!(check_collisiong1(gamestate, rot) & (T_BOUND_RIGHT_WALL | T_BOUND_LEFT_WALL | T_BOUND_FLOOR))) return false;
     char x, y, i, j;
     Player *player = &gamestate->player;
     Point abs_points[4];
@@ -137,7 +135,7 @@ unsigned char check_collision(int x, int y, PieceData *tetromino, unsigned char 
 
         if(abs_points[i].x > BOARD_WIDTH-1)
             collision_flag |= T_BOUND_RIGHT_WALL;
-        else if(abs_points[i].x+1 > BOARD_WIDTH-1)
+        if(abs_points[i].x+1 >= BOARD_WIDTH)
             collision_flag |= T_BOUND_RIGHT;
         else if(board[abs_points[i].y][abs_points[i].x+1] != 0)
             collision_flag |= T_BOUND_RIGHT;
