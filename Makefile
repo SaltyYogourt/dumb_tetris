@@ -1,4 +1,4 @@
-CC 				= gcc
+CC			= gcc
 
 BUILD_DIR 		:= .build
 SRC_DIR			:= ./src
