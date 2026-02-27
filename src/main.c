@@ -79,7 +79,7 @@ void update_game(GameState *gamestate)
     Player *player = &gamestate->player;
     unsigned char *block;
     Point offsets[4];  
-    get_abs_offsets(player, player->rot, offsets); 
+    get_abs_offsetsp(player, player->rot, offsets); 
     int i,j;
     for(i = 0; BOARD_HEIGHT > i; i++){
         for(j = 0; BOARD_WIDTH > j; j++)
@@ -90,7 +90,7 @@ void update_game(GameState *gamestate)
     }
     
     //collision checking
-    unsigned char collision = check_collision(gamestate, player->rot);
+    unsigned char collision = check_collisiong1(gamestate, player->rot);
     
     if ( !(collision & T_BOUND_BELOW) ) player->y++;
 
@@ -103,7 +103,7 @@ void update_game(GameState *gamestate)
     gamestate->player.move_x = T_MOVE_STILL;
 
     //check if we fucked up and ended up inside of a block; push us out. Hacky.
-    while (check_collision(gamestate,player-> rot) & T_BOUND_OVERLAP){
+    while (check_collisiong1(gamestate,player-> rot) & T_BOUND_OVERLAP){
         player->y--;
     }
 
@@ -143,7 +143,7 @@ void draw_board(GameState *gamestate)
     SDL_Color player_color = gamestate->player.tetromino->color;
     SDL_SetRenderDrawColor(gamestate->renderer, player_color.r, player_color.g, player_color.b, SDL_ALPHA_OPAQUE);
     Point points_to_draw[4];
-    get_abs_offsets(&gamestate->player, gamestate->player.rot, points_to_draw);
+    get_abs_offsetsp(&gamestate->player, gamestate->player.rot, points_to_draw);
 
     for(i=0; 4 > i; ++i){
         rect.x = points_to_draw[i].x*CELL_SIZE;
