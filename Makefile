@@ -18,7 +18,7 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(LINKER_FLAGS) -lSDL3 -MMD -MP -c $< -o $@
+	$(CC) $(CFLAGS) $(LINKER_FLAGS) -MMD -MP -c $< -o $@
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $(LINKER_FLAGS) $^ -o $@
