@@ -9,9 +9,9 @@ OBJS			= $(addprefix $(BUILD_DIR)/, $(notdir $(SRCS:.c=.o)))
 DEPS			= $(OBJS:.o=.d)
 
 CFLAGS 			:= -Wall -Wextra
-OPTIMIZE_FLAGS 	:= -O3
-DEBUG_FLAGS 	= -g
-LINKER_FLAGS 	= -lSDL3
+OPTIMIZE_FLAGS 		:= -O3
+DEBUG_FLAGS 		= -g
+LINKER_FLAGS 		= -lSDL3
 OBJ_NAME 		= main
 
 $(BUILD_DIR):
