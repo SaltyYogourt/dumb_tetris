@@ -4,6 +4,8 @@
 
 #include "main.h"
 #include "tetromino.h"
+#include "draw.h"
+#include "game.h"
 
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -33,7 +35,6 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     
     gamestate->board[19][5] = 2;
 
-    SDL_SetRenderVSync(gamestate->renderer, 1);
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
         return SDL_APP_FAILURE;
@@ -44,6 +45,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
     SDL_SetRenderLogicalPresentation(gamestate->renderer, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+    SDL_SetRenderVSync(gamestate->renderer, 1);
+    SDL_SetRenderDrawBlendMode(gamestate->renderer, SDL_BLENDMODE_BLEND);
 
     return SDL_APP_CONTINUE;  
 }
@@ -134,44 +137,12 @@ void update_game(GameState *gamestate)
     }
 }
 
-void draw_board(GameState *gamestate)
-{
-    SDL_SetRenderDrawColor(gamestate->renderer, 16, 16, 16, SDL_ALPHA_OPAQUE);  
-    SDL_RenderClear(gamestate->renderer);
-
-    SDL_FRect rect;
-    rect.w = rect.h = CELL_SIZE;
-    int i,j;
-        
-    for(i = 0; BOARD_HEIGHT > i; i++){
-        for(j = 0; BOARD_WIDTH > j; j++){
-            if(gamestate->board[i][j] == T_EMPTY) continue;
-            rect.x = j*CELL_SIZE;
-            rect.y = i*CELL_SIZE;
-            if(gamestate->board[i][j] == T_PLAYER) SDL_SetRenderDrawColor(gamestate->renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
-            else if(gamestate->board[i][j] == T_BLOCK) SDL_SetRenderDrawColor(gamestate->renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
-            SDL_RenderFillRect(gamestate->renderer,&rect);
-        }
-    }
-    
-    SDL_Color player_color = gamestate->player.tetromino->color;
-    SDL_SetRenderDrawColor(gamestate->renderer, player_color.r, player_color.g, player_color.b, SDL_ALPHA_OPAQUE);
-    Point points_to_draw[4];
-    get_abs_offsetsp(&gamestate->player, gamestate->player.rot, points_to_draw);
-
-    for(i=0; 4 > i; ++i){
-        rect.x = points_to_draw[i].x*CELL_SIZE;
-        rect.y = points_to_draw[i].y*CELL_SIZE;
-        SDL_RenderFillRect(gamestate->renderer,&rect);
-    }
-    SDL_RenderPresent(gamestate->renderer);
-}
 
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
     const Uint64 ticks = SDL_GetTicks();
     GameState *gamestate = appstate;
-    draw_board(gamestate);
+    draw_game(gamestate);
     while((ticks - gamestate->last_tick) >= TICKRATE){
         update_game(gamestate);
         gamestate->last_tick += TICKRATE;
