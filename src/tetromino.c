@@ -1,53 +1,52 @@
 #include "tetromino.h"
-#include "main.h"
 #include <SDL3/SDL.h>
 
 void init_tetrominos(PieceData *t){
     PieceData I, O, T, J, L, S, Z; 
 
-    I.color.r = 64; I.color.g = 64; I.color.b = 255;
+    I.color.r = 64; I.color.g = 64; I.color.b = 255; I.color.a = 255;
 
     memcpy( I.offset[0], (Point[]){ {-1,0}, {0,0}, {1,0}, {2,0} }, sizeof(Point[4]) ); //rot 0
     memcpy( I.offset[1], (Point[]){ {0,-1}, {0,0}, {0,1}, {0,2} }, sizeof(Point[4]) ); //rot 1
     memcpy( I.offset[2], I.offset[0], sizeof(Point[4]) ); //rot 2
     memcpy( I.offset[3], I.offset[1], sizeof(Point[4]) ); //rot 3
 
-    O.color.r = 255; O.color.g = 165; O.color.b = 0; 
+    O.color.r = 255; O.color.g = 165; O.color.b = 0; O.color.a = 255;
 
     memcpy( O.offset[0], (Point[]){ {0,0}, {1,0}, {0,1}, {1,1} },  sizeof(Point[4]) );
     memcpy( O.offset[1], O.offset[0], sizeof(Point[4])); 
     memcpy( O.offset[2], O.offset[0], sizeof(Point[4]));
     memcpy( O.offset[3], O.offset[0], sizeof(Point[4])); //it's a fucking square.
 
-    T.color.r = 224; T.color.b = 224; T.color.g = 0;
+    T.color.r = 224; T.color.b = 224; T.color.g = 0; T.color.a = 255;
 
     memcpy( T.offset[0], (Point[]){ {0,0},  {-1,0}, {1,0}, {0,1} }, sizeof(Point[4]) ); //rot 0
     memcpy( T.offset[1], (Point[]){ {0,-1}, {0,0}, {0,1}, {-1,0} }, sizeof(Point[4]) ); //rot 1
     memcpy( T.offset[2], (Point[]){ {1,1}, {0,0}, {-1,1}, {0,1} }, sizeof(Point[4]) ); //rot 2
     memcpy( T.offset[3], (Point[]){ {0,-1}, {0,0}, {0,1}, {1,0} }, sizeof(Point[4]) ); //rot 3
 
-    L.color.r = 255; L.color.g = 180; L.color.b = 50;
+    L.color.r = 255; L.color.g = 180; L.color.b = 50; L.color.a = 255;
 
     memcpy( L.offset[0], (Point[]){ {-1,0},  {0,0}, {1,0}, {-1,1} }, sizeof(Point[4]) ); //rot 0
     memcpy( L.offset[1], (Point[]){ {-1,-1}, {0,-1}, {0,0}, {0,1} }, sizeof(Point[4]) ); //rot 1
     memcpy( L.offset[2], (Point[]){ {1,0}, {1,1}, {0,1}, {-1,1} }, sizeof(Point[4]) ); //rot 2
     memcpy( L.offset[3], (Point[]){ {0,-1}, {0,0}, {0,1}, {1,1} }, sizeof(Point[4]) ); //rot 3
 
-    J.color.r = 0; J.color.g = 0; J.color.b = 156; 
+    J.color.r = 0; J.color.g = 0; J.color.b = 156; J.color.a = 255;
 
     memcpy( J.offset[0], (Point[]){ {-1,0},  {0,0}, {1,0}, {1,1} }, sizeof(Point[4]) ); //rot 0
     memcpy( J.offset[1], (Point[]){ {-1,1}, {0,-1}, {0,0}, {0,1} }, sizeof(Point[4]) ); //rot 1
     memcpy( J.offset[2], (Point[]){ {-1,0}, {1,1}, {0,1}, {-1,1} }, sizeof(Point[4]) ); //rot 2
     memcpy( J.offset[3], (Point[]){ {0,-1}, {0,0}, {0,1}, {1,-1} }, sizeof(Point[4]) ); //rot 3
 
-    S.color.r = 255; S.color.g = 50; S.color.b = 232;
+    S.color.r = 255; S.color.g = 50; S.color.b = 232; S.color.a = 255;
 
     memcpy( S.offset[0], (Point[]){ {0,0}, {-1,0}, {0,-1}, {1,-1} }, sizeof(Point[4]) ); //rot 0
     memcpy( S.offset[1], (Point[]){ {-1,-1}, {-1,0}, {0,0}, {0,1} }, sizeof(Point[4]) ); //rot 1
     memcpy( S.offset[2], S.offset[0], sizeof(Point[4]) ); //rot 2
     memcpy( S.offset[3], S.offset[1], sizeof(Point[4]) ); //rot 3
 
-    Z.color.r = 78; Z.color.g = 255; Z.color.b = 50;
+    Z.color.r = 78; Z.color.g = 255; Z.color.b = 50; Z.color.a = 255;
 
     memcpy( Z.offset[0], (Point[]){ {0,0}, {1,0}, {0,-1}, {-1,-1} }, sizeof(Point[4]) ); //rot 0
     memcpy( Z.offset[1], (Point[]){ {1,-1}, {1,0}, {0,0}, {0,1} }, sizeof(Point[4]) ); //rot 1
@@ -55,6 +54,14 @@ void init_tetrominos(PieceData *t){
     memcpy( Z.offset[3], Z.offset[1], sizeof(Point[4]) ); //rot 3
 
     t[T_I] = I; t[T_O] = O; t[T_T] = T; t[T_J] = J; t[T_L] = L; t[T_S] = S; t[T_Z] = Z;
+}
+
+int get_player_floor(Player *player, unsigned char (*board)[10]){
+    int y = player->y;
+    while(~check_collision(player->x, y, player->tetromino, board, player->rot) & T_BOUND_BELOW){
+            y++;
+    }
+    return y;
 }
 
 void get_abs_offsetsp(Player *player, unsigned char rot, Point *points){
