@@ -12,6 +12,7 @@
 
 #define WINDOW_WIDTH BOARD_WIDTH*CELL_SIZE
 #define WINDOW_HEIGHT BOARD_HEIGHT*CELL_SIZE
+#define BUFFER_COUNT
 
 typedef struct {
     char x;
@@ -35,14 +36,23 @@ typedef struct {
 } Player;
 
 typedef struct {
+    char *items;
+    int count;
+    int capacity;
+} InputBuffer;
+
+typedef struct {
     unsigned char board[BOARD_HEIGHT][BOARD_WIDTH];
     Uint64 last_tick;
+    Uint64 deltatime;
     PieceData piece_data[7];
     Player player;
     SDL_Window *window;
     SDL_Renderer *renderer;
+    InputBuffer buffers[2];
 } GameState;
 
 enum { T_EMPTY, T_PLAYER, T_BLOCK };
+enum { BUF_MOVX, BUF_ROT };
 
 #endif

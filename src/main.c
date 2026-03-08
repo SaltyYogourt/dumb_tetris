@@ -7,6 +7,15 @@
 #include "draw.h"
 #include "game.h"
 
+#define buffer_append(buffer, item)\
+   do {\
+           if(buffer.capacity <= buffer.count) {\
+                if(buffer.capacity == 0) buffer.capacity = 256;\
+                else buffer.capacity *= 1.5;\
+                buffer.items = SDL_realloc(buffer.items, sizeof(*buffer.items)*buffer.capacity);\
+           }\
+           buffer.items[buffer.count++] = item;\
+    } while(0);\
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
@@ -18,7 +27,9 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     
     gamestate->window = NULL;
     gamestate->renderer = NULL;
+    gamestate->last_tick = SDL_GetTicks();
     Player *player = &gamestate->player;
+
     SDL_memset(gamestate->board, T_EMPTY, sizeof(gamestate->board[0][0])*BOARD_HEIGHT*BOARD_WIDTH);
 
     int tetromino_id = T_T;
@@ -26,13 +37,14 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     SDL_Log("%d\n", tetromino_id);
 
     init_tetrominos(gamestate->piece_data);
+
     player->x = BOARD_WIDTH/2;
     player->y = 1;
     player->rot = 0;
-    //player->tetromino = &gamestate->piece_data[T_T]; //lmao. should this data be duplicateD? just get it working for now. we can cast it to a pointer later.
     player->tetromino = &gamestate->piece_data[tetromino_id]; //lmao. should this data be duplicateD? just get it working for now. we can cast it to a pointer later.
     player->tetromino_id = tetromino_id;
-    
+
+    //debug testing shit.
     gamestate->board[19][5] = 2;
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -54,24 +66,23 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
+    GameState *gamestate = (GameState*)appstate;
     if (event->type == SDL_EVENT_QUIT) {
         return SDL_APP_SUCCESS;  
     }
-    //TODO: EVENT HANDLING SHOULD NOT UPDATE THE GAMESTATE!
-    //probably best to inform the game it has to do an action(s) on each tick/frame.
-    //we should also avoid only polling for game inputs ever n ticks. that would be annoying to the player
     if (event->type == SDL_EVENT_KEY_DOWN){
         if (event->key.scancode == SDL_SCANCODE_D){
-           ((GameState *)appstate)->player.move_x = T_MOVE_RIGHT;
+           //((GameState *)appstate)->player.move_x = T_MOVE_RIGHT;
+           buffer_append(gamestate->buffers[BUF_MOVX], T_MOVE_RIGHT);
         }
         else if (event->key.scancode == SDL_SCANCODE_A){
-           ((GameState *)appstate)->player.move_x = T_MOVE_LEFT;
+           buffer_append(gamestate->buffers[BUF_MOVX], T_MOVE_LEFT);
         }
         else if (event->key.scancode == SDL_SCANCODE_W){
-           ((GameState *)appstate)->player.rot_dir = 1;
+           buffer_append(gamestate->buffers[BUF_ROT], 1);
         }
         else if (event->key.scancode == SDL_SCANCODE_S){
-           ((GameState *)appstate)->player.rot_dir = -1;
+           buffer_append(gamestate->buffers[BUF_ROT], -1);
         }
     }
     return SDL_APP_CONTINUE;  
@@ -99,12 +110,19 @@ void update_game(GameState *gamestate)
     if ( !(collision & T_BOUND_BELOW) ) player->y++;
 
     //handle movement
-    if ( player->move_x == T_MOVE_RIGHT && !(collision & T_BOUND_RIGHT) )
-        player->x++;
-    else if ( player->move_x == T_MOVE_LEFT && !(collision & T_BOUND_LEFT) )
-        player->x--;
+    InputBuffer *movx = &gamestate->buffers[BUF_MOVX];
+    for(int i = movx->count; 0 < i; --i){
+        if (movx->items[i] == T_MOVE_STILL) continue;
+        else if (movx->items[i] == T_MOVE_RIGHT && !(collision & T_BOUND_RIGHT) )
+            player->x++;
+        else if (movx->items[i] == T_MOVE_LEFT && !(collision & T_BOUND_LEFT) )
+            player->x--;
 
-    gamestate->player.move_x = T_MOVE_STILL;
+        movx->items[i] = T_MOVE_STILL;
+        movx->count--;
+    }
+
+    //gamestate->player.move_x = T_MOVE_STILL;
 
     //check if we fucked up and ended up inside of a block; push us out. Hacky.
     while (check_collisiong2(gamestate) & T_BOUND_OVERLAP){
@@ -137,17 +155,24 @@ void update_game(GameState *gamestate)
     }
 }
 
-
+Uint64 lag = 0;    
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
-    const Uint64 ticks = SDL_GetTicks();
+    const Uint64 current_ticks = SDL_GetTicks();
     GameState *gamestate = appstate;
-    draw_game(gamestate);
-    while((ticks - gamestate->last_tick) >= TICKRATE){
-        update_game(gamestate);
-        gamestate->last_tick += TICKRATE;
-    }
+
+    gamestate->deltatime = current_ticks - gamestate->last_tick;
+    gamestate->last_tick = current_ticks;
+    lag += gamestate->deltatime;
     
+    while(lag >= TICKRATE){ 
+        update_game(gamestate);
+        lag -= TICKRATE;
+    }
+
+    draw_game(gamestate);
+
+    SDL_Delay(1);
     return SDL_APP_CONTINUE;  
 }
 
