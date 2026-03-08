@@ -11,6 +11,7 @@ DEPS			= $(OBJS:.o=.d)
 CFLAGS 			:= -Wall -Wextra
 OPTIMIZE_FLAGS 		:= -O3
 DEBUG_FLAGS 		= -g
+DEBUG3_FLAGS 		= -ggdb3
 LINKER_FLAGS 		= -lSDL3
 OBJ_NAME 		= main
 
@@ -32,6 +33,9 @@ release: all
 
 debug: CFLAGS += $(DEBUG_FLAGS)
 debug: all
+
+debug3: CFLAGS += $(DEBUG3_FLAGS)
+debug3: all
 
 clean: 
 	rm -rf $(TARGET) $(OBJS)
