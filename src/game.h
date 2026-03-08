@@ -8,11 +8,11 @@
 #define BOARD_HEIGHT 20
 #define CELL_SIZE 24
 
-#define TICKRATE 250
+#define TICKRATE 60
+#define TICK (1000.0f/TICKRATE)
 
 #define WINDOW_WIDTH BOARD_WIDTH*CELL_SIZE
 #define WINDOW_HEIGHT BOARD_HEIGHT*CELL_SIZE
-#define BUFFER_COUNT
 
 typedef struct {
     char x;
@@ -29,30 +29,21 @@ typedef struct {
     unsigned char y;
     unsigned char tetromino_id;
     char rot;
-    char move_x;
-    char rot_dir;
-    char rotation;
     PieceData *tetromino;
 } Player;
 
 typedef struct {
-    char *items;
-    int count;
-    int capacity;
-} InputBuffer;
-
-typedef struct {
-    unsigned char board[BOARD_HEIGHT][BOARD_WIDTH];
+    float gravity;
+    float gravity_step;
     Uint64 last_tick;
     Uint64 deltatime;
     PieceData piece_data[7];
-    Player player;
     SDL_Window *window;
     SDL_Renderer *renderer;
-    InputBuffer buffers[2];
+    Player player;
+    unsigned char board[BOARD_HEIGHT][BOARD_WIDTH];
 } GameState;
 
 enum { T_EMPTY, T_PLAYER, T_BLOCK };
-enum { BUF_MOVX, BUF_ROT };
 
 #endif

@@ -7,16 +7,6 @@
 #include "draw.h"
 #include "game.h"
 
-#define buffer_append(buffer, item)\
-   do {\
-           if(buffer.capacity <= buffer.count) {\
-                if(buffer.capacity == 0) buffer.capacity = 256;\
-                else buffer.capacity *= 1.5;\
-                buffer.items = SDL_realloc(buffer.items, sizeof(*buffer.items)*buffer.capacity);\
-           }\
-           buffer.items[buffer.count++] = item;\
-    } while(0);\
-
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
     SDL_SetAppMetadata("Stupid Tetris Clone", "1.0", "com.saltyyogourt.tetrisclone");
@@ -28,6 +18,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     gamestate->window = NULL;
     gamestate->renderer = NULL;
     gamestate->last_tick = SDL_GetTicks();
+    gamestate->gravity = 1.0f/64.0f;
+    gamestate->gravity_step = 0.0f;
     Player *player = &gamestate->player;
 
     SDL_memset(gamestate->board, T_EMPTY, sizeof(gamestate->board[0][0])*BOARD_HEIGHT*BOARD_WIDTH);
@@ -71,21 +63,64 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         return SDL_APP_SUCCESS;  
     }
     if (event->type == SDL_EVENT_KEY_DOWN){
-        if (event->key.scancode == SDL_SCANCODE_D){
-           //((GameState *)appstate)->player.move_x = T_MOVE_RIGHT;
-           buffer_append(gamestate->buffers[BUF_MOVX], T_MOVE_RIGHT);
-        }
-        else if (event->key.scancode == SDL_SCANCODE_A){
-           buffer_append(gamestate->buffers[BUF_MOVX], T_MOVE_LEFT);
-        }
-        else if (event->key.scancode == SDL_SCANCODE_W){
-           buffer_append(gamestate->buffers[BUF_ROT], 1);
-        }
-        else if (event->key.scancode == SDL_SCANCODE_S){
-           buffer_append(gamestate->buffers[BUF_ROT], -1);
+        switch (event->key.scancode){
+            case SDL_SCANCODE_D:
+                movx(gamestate, T_MOVE_RIGHT);
+                break;
+            case SDL_SCANCODE_A:
+                movx(gamestate, T_MOVE_LEFT);
+                break;
+            case SDL_SCANCODE_W:
+                rot(gamestate, ROT_DIR_CLOCKWISE);
+                break;
+            case SDL_SCANCODE_S:
+                rot(gamestate, ROT_DIR_COUNTERCLOCKWISE);
+                break;
+            case SDL_SCANCODE_SPACE:
+                break;
+            default:
+                break;
         }
     }
     return SDL_APP_CONTINUE;  
+}
+
+void movx(GameState *gamestate, int dir){ 
+    unsigned char collision = check_collisiong2(gamestate);
+    switch (dir) {
+        case T_MOVE_RIGHT:
+            if(!(collision & T_BOUND_RIGHT)) gamestate->player.x++;
+            break;
+        case T_MOVE_LEFT:
+            if(!(collision & T_BOUND_LEFT)) gamestate->player.x--;
+            break;
+        default: 
+            break;
+    }
+}
+
+void rot(GameState *gamestate, int dir){
+    Player *player = &gamestate->player;
+    int new_rot = player->rot+dir;
+   
+    if (new_rot > 3) new_rot = 0;
+    else if (new_rot < 0) new_rot = 3; 
+
+    switch (check_rotation(gamestate, new_rot)) {
+            case ROT_INPLACE:
+                    player->rot = new_rot;
+                    break;
+            case ROT_KICK_RIGHT:
+                    player->rot = new_rot;
+                    player->x++;
+                    break;
+            case ROT_KICK_LEFT:
+                    player->rot = new_rot;
+                    player->x--;
+                    break;
+            case ROT_NOP:
+                    break;
+    }
 }
 
 void update_game(GameState *gamestate)
@@ -104,54 +139,20 @@ void update_game(GameState *gamestate)
         }
     }
     
-    //collision checking
     unsigned char collision = check_collisiong1(gamestate, player->rot);
-    
-    if ( !(collision & T_BOUND_BELOW) ) player->y++;
 
-    //handle movement
-    InputBuffer *movx = &gamestate->buffers[BUF_MOVX];
-    for(int i = movx->count; 0 < i; --i){
-        if (movx->items[i] == T_MOVE_STILL) continue;
-        else if (movx->items[i] == T_MOVE_RIGHT && !(collision & T_BOUND_RIGHT) )
-            player->x++;
-        else if (movx->items[i] == T_MOVE_LEFT && !(collision & T_BOUND_LEFT) )
-            player->x--;
-
-        movx->items[i] = T_MOVE_STILL;
-        movx->count--;
+    //fall
+    if (collision & T_BOUND_BELOW);
+    else if(SDL_floor((gamestate->gravity_step+=gamestate->gravity))){
+        while(SDL_floor(gamestate->gravity_step) > 0) {
+            player->y++;
+            gamestate->gravity_step-=1;
+        }
     }
-
-    //gamestate->player.move_x = T_MOVE_STILL;
 
     //check if we fucked up and ended up inside of a block; push us out. Hacky.
     while (check_collisiong2(gamestate) & T_BOUND_OVERLAP){
         player->y--;
-    }
-
-    //handle rotation
-    if (player->rot_dir) {
-        int new_rot = player->rot+player->rot_dir;
-       
-        if (new_rot > 3) new_rot = 0;
-        else if (new_rot < 0) new_rot = 3; 
-
-        switch (check_rotation(gamestate, new_rot)) {
-                case ROT_INPLACE:
-                        player->rot = new_rot;
-                        break;
-                case ROT_KICK_RIGHT:
-                        player->rot = new_rot;
-                        player->x++;
-                        break;
-                case ROT_KICK_LEFT:
-                        player->rot = new_rot;
-                        player->x--;
-                        break;
-                case ROT_NOP:
-                        break;
-        }
-        player->rot_dir = 0;
     }
 }
 
@@ -165,9 +166,9 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     gamestate->last_tick = current_ticks;
     lag += gamestate->deltatime;
     
-    while(lag >= TICKRATE){ 
+    while(lag >= TICK){ 
         update_game(gamestate);
-        lag -= TICKRATE;
+        lag -= TICK;
     }
 
     draw_game(gamestate);
