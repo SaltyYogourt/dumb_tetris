@@ -76,6 +76,19 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
             case SDL_SCANCODE_S:
                 rot(gamestate, ROT_DIR_COUNTERCLOCKWISE);
                 break;
+            case SDL_SCANCODE_P:
+                gamestate->gravity=2.0f;
+                break;
+            case SDL_SCANCODE_Q:
+                gamestate->gravity+=8/64.0f;
+                break;
+            case SDL_SCANCODE_E:
+                gamestate->gravity-=8/64.0f;
+                break;
+            case SDL_SCANCODE_R:
+                gamestate->player.y = 3;
+                gamestate->gravity_step = 0.0f;
+                break;
             case SDL_SCANCODE_SPACE:
                 break;
             default:
@@ -139,12 +152,12 @@ void update_game(GameState *gamestate)
         }
     }
     
-    unsigned char collision = check_collisiong1(gamestate, player->rot);
+    unsigned char collision = check_collisiong2(gamestate);
 
     //fall
     if (collision & T_BOUND_BELOW);
     else if(SDL_floor((gamestate->gravity_step+=gamestate->gravity))){
-        while(SDL_floor(gamestate->gravity_step) > 0) {
+        while(SDL_floor(gamestate->gravity_step) > 0 && !(check_collisiong2(gamestate) & T_BOUND_BELOW)) {
             player->y++;
             gamestate->gravity_step-=1;
         }
