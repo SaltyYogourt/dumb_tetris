@@ -24,23 +24,27 @@ typedef struct {
     Point offset[4][4]; //we ONLY have four offsets including 0,0, right? 
 } PieceData;
 
+typedef struct { //hardcode UI positions. we can deserialize later........
+    Point board_position;
+} UI;
+
 typedef struct {
+    PieceData *tetromino;
     unsigned char x;
     unsigned char y;
     unsigned char tetromino_id;
     char rot;
-    PieceData *tetromino;
 } Player;
 
 typedef struct {
     float gravity;
     float gravity_step;
-    Uint64 last_tick;
-    Uint64 deltatime;
-    PieceData piece_data[7];
     SDL_Window *window;
     SDL_Renderer *renderer;
     Player player;
+    Uint64 last_tick;
+    Uint64 deltatime;
+    PieceData piece_data[7];
     unsigned char board[BOARD_HEIGHT][BOARD_WIDTH];
 } GameState;
 
