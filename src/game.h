@@ -14,6 +14,8 @@
 #define WINDOW_WIDTH BOARD_WIDTH*CELL_SIZE
 #define WINDOW_HEIGHT BOARD_HEIGHT*CELL_SIZE
 
+typedef float Vector2 __attribute__ ((vector_size(16)));
+
 typedef struct {
     char x;
     char y;
