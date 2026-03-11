@@ -14,7 +14,11 @@
 #define WINDOW_WIDTH BOARD_WIDTH*CELL_SIZE
 #define WINDOW_HEIGHT BOARD_HEIGHT*CELL_SIZE
 
-typedef float Vector2 __attribute__ ((vector_size(16)));
+/*
+// what you're refering to as C, is in fact, GNU/C.
+// this won't port to MSVC easily. use mingw?
+typedef float Vector2 __attribute__ ((vector_size(sizeof(float)*2)));
+*/
 
 typedef struct {
     char x;
