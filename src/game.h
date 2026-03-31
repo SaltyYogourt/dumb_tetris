@@ -14,6 +14,13 @@
 #define WINDOW_WIDTH BOARD_WIDTH*CELL_SIZE
 #define WINDOW_HEIGHT BOARD_HEIGHT*CELL_SIZE
 
+#define LOCK_DELAY 8*TICK
+
+#define STARTING_Y 0
+
+#define TETROMINO_RAND_RETRIES 4
+#define TETROMINO_HISTORY_LEN 4
+
 typedef struct {
     char x;
     char y;
@@ -25,8 +32,8 @@ typedef struct {
 } PieceData;
 
 typedef struct {
-    unsigned char x;
-    unsigned char y;
+    char x;
+    char y;
     unsigned char tetromino_id;
     char rot;
     PieceData *tetromino;
@@ -35,8 +42,10 @@ typedef struct {
 typedef struct {
     float gravity;
     float gravity_step;
+    int lock_time;
     Uint64 last_tick;
     Uint64 deltatime;
+    unsigned char piece_history_idx[4];
     PieceData piece_data[7];
     SDL_Window *window;
     SDL_Renderer *renderer;

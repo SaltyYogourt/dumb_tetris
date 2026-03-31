@@ -2,16 +2,26 @@
 #include "tetromino.h"
 #include "game.h"
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_stdinc.h>
 
 SDL_FRect rect;
+
+void debug_gravity(GameState *gamestate){
+    char debug_text[64];
+    SDL_snprintf(debug_text, 64, "%f, x: %d, y: %d, idx: %d", gamestate->gravity, gamestate->player.x, gamestate->player.y, gamestate->player.tetromino_id);
+    SDL_SetRenderDrawColor(gamestate->renderer, 255,255,255,255);
+    SDL_RenderDebugText(gamestate->renderer, 0, 24, debug_text);
+}
 
 void draw_game(GameState *gamestate){
     rect.w = rect.h = CELL_SIZE;
     draw_board(gamestate->board, gamestate->renderer);
     draw_player(&gamestate->player, gamestate->renderer);
     draw_player_shadow(&gamestate->player, gamestate->board, gamestate->renderer);
+    debug_gravity(gamestate);
     SDL_RenderPresent(gamestate->renderer);
 }
+
 
 void draw_board(unsigned char (*board)[10], SDL_Renderer *renderer)
 {
