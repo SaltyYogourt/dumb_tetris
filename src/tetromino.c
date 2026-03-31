@@ -41,14 +41,14 @@ void init_tetrominos(PieceData *t){
 
     S.color.r = 255; S.color.g = 50; S.color.b = 232; S.color.a = 255;
 
-    memcpy( S.offset[0], (Point[]){ {0,0}, {-1,0}, {0,-1}, {1,-1} }, sizeof(Point[4]) ); //rot 0
+    memcpy( S.offset[0], (Point[]){ {0,1}, {-1,1}, {0,0}, {1,0} }, sizeof(Point[4]) ); //rot 0
     memcpy( S.offset[1], (Point[]){ {-1,-1}, {-1,0}, {0,0}, {0,1} }, sizeof(Point[4]) ); //rot 1
     memcpy( S.offset[2], S.offset[0], sizeof(Point[4]) ); //rot 2
     memcpy( S.offset[3], S.offset[1], sizeof(Point[4]) ); //rot 3
 
     Z.color.r = 78; Z.color.g = 255; Z.color.b = 50; Z.color.a = 255;
 
-    memcpy( Z.offset[0], (Point[]){ {0,0}, {1,0}, {0,-1}, {-1,-1} }, sizeof(Point[4]) ); //rot 0
+    memcpy( Z.offset[0], (Point[]){ {0,1}, {1,1}, {0,0}, {-1,0} }, sizeof(Point[4]) ); //rot 0
     memcpy( Z.offset[1], (Point[]){ {1,-1}, {1,0}, {0,0}, {0,1} }, sizeof(Point[4]) ); //rot 1
     memcpy( Z.offset[2], Z.offset[0], sizeof(Point[4]) ); //rot 2
     memcpy( Z.offset[3], Z.offset[1], sizeof(Point[4]) ); //rot 3
@@ -71,8 +71,8 @@ void get_abs_offsetsp(Player *player, unsigned char rot, Point *points){
 void get_abs_offsets(int x, int y, PieceData *tetromino, unsigned char rot, Point *points){
     //unsigned char rot = player->rot;
     for(int i = 0; 4 > i; ++i){ // fill the values
-        points[i].x = (x+tetromino->offset[rot][i].x);
-        points[i].y = (y+tetromino->offset[rot][i].y);
+        points[i].x = (x+(tetromino->offset[rot][i].x));
+        points[i].y = (y+(tetromino->offset[rot][i].y));
     }
 }
 
@@ -87,35 +87,39 @@ void get_abs_offsets(int x, int y, PieceData *tetromino, unsigned char rot, Poin
  */
 unsigned char check_rotation(GameState *gamestate, char rot){
     if (!(check_collisiong1(gamestate, rot) & (T_BOUND_OVERLAP | T_BOUND_RIGHT_WALL | T_BOUND_LEFT_WALL))) return ROT_INPLACE;
-    if (center_column_rule(gamestate, rot) || gamestate->player.tetromino_id == T_I) return ROT_NOP;
+    //DON'T SWAP THE ORDER OF CONDITIONS!!!
+    //T_I FUCKS CENTER COLUMN FUNCTION UP
+    if (gamestate->player.tetromino_id == T_I  || center_column_rule(gamestate, rot)) return ROT_NOP;
 
     Player *player = &gamestate->player;
     //sliiiide to the right
     if (!(check_collision(player->x+1, player->y, player->tetromino, gamestate->board, rot) & (T_BOUND_OVERLAP | T_BOUND_RIGHT_WALL))) return ROT_KICK_RIGHT;
 
     //sliiiiiiide to the left...?
-    if (!(check_collision(player->x-1, player->y, player->tetromino, gamestate->board, rot) & (T_BOUND_OVERLAP | T_BOUND_RIGHT_WALL))) return ROT_KICK_LEFT;
+    if (!(check_collision(player->x-1, player->y, player->tetromino, gamestate->board, rot) & (T_BOUND_OVERLAP | T_BOUND_LEFT_WALL))) return ROT_KICK_LEFT;
 
     //well shit.
     return ROT_NOP;
 }
 
 bool center_column_rule(GameState *gamestate, char rot){
-     if(!(check_collisiong1(gamestate, rot) & (T_BOUND_RIGHT_WALL | T_BOUND_LEFT_WALL | T_BOUND_FLOOR))) return false;
+    //if(!(check_collisiong1(gamestate, rot) & (T_BOUND_RIGHT_WALL | T_BOUND_LEFT_WALL))) return false;
     char x, y, i, j;
     Player *player = &gamestate->player;
+    //in case we try to access this when we shouldn't. I piece will fuck our shit up and cause a stack smash/overflow
+    if(player->tetromino_id == T_I) return true; 
     Point abs_points[4];
     char virtual_board[3][3];
-    for(i = 0; i > 3; i++) SDL_memset(virtual_board[i], 0, 3);
-    for(i = 0; i > 4; i++){
-        virtual_board[(player->tetromino->offset[rot][i].y-1)][player->tetromino->offset[rot][i].x-1] = T_PLAYER;
+    for(i = 0; i < 3; i++) SDL_memset(virtual_board[i], 0, 3);
+    for(i = 0; i < 4; i++){
+        virtual_board[(player->tetromino->offset[rot][i].y+1)][player->tetromino->offset[rot][i].x+1] = T_PLAYER;
     }
     get_abs_offsetsp(&gamestate->player, rot, abs_points);
-    for (int i = 0; 3 > i; ++i){
-        for (int j = 0; 3 > j; ++j){
+    for (i = 0; 3 > i; ++i){
+        for (j = 0; 3 > j; ++j){
             x = gamestate->player.x-1+j; 
             y = gamestate->player.y-1+i; 
-            if (gamestate->board[y][x] != T_EMPTY && virtual_board[y][x] == T_PLAYER) {
+            if (gamestate->board[y][x] != T_EMPTY && virtual_board[i][j] == T_PLAYER) {
                     if(j==1) return true;
                     return false;
             }
@@ -140,6 +144,15 @@ unsigned char check_collision(int x, int y, PieceData *tetromino, unsigned char 
     unsigned char collision_flag = 0;
     for(int i = 0; 4 > i; ++i){
 
+        if(abs_points[i].y > BOARD_HEIGHT-1)
+            collision_flag |= T_BOUND_FLOOR;
+        else if(abs_points[i].y+1 > BOARD_HEIGHT-1)
+            collision_flag |= T_BOUND_BELOW;
+        else if(board[abs_points[i].y+1][abs_points[i].x] != 0)
+            collision_flag |= T_BOUND_BELOW;
+
+        if(abs_points[i].y < 0) continue;  //don't shoot ourselves in the foot indexing OOB
+            
         if(abs_points[i].x > BOARD_WIDTH-1)
             collision_flag |= T_BOUND_RIGHT_WALL;
         if(abs_points[i].x+1 >= BOARD_WIDTH)
@@ -154,14 +167,7 @@ unsigned char check_collision(int x, int y, PieceData *tetromino, unsigned char 
         else if(board[abs_points[i].y][abs_points[i].x-1] != 0)
             collision_flag |= T_BOUND_LEFT;
 
-        if(abs_points[i].y > BOARD_HEIGHT-1)
-            collision_flag |= T_BOUND_FLOOR;
-        else if(abs_points[i].y+1 > BOARD_HEIGHT-1)
-            collision_flag |= T_BOUND_BELOW;
-        else if(board[abs_points[i].y+1][abs_points[i].x] != 0)
-            collision_flag |= T_BOUND_BELOW;
-
-        if(abs_points[i].x < BOARD_WIDTH && abs_points[i].x > 0 && abs_points[i].y < BOARD_HEIGHT) { //don't shoot ourselves in the foot indexing OOB
+        if(abs_points[i].x < BOARD_WIDTH && abs_points[i].x >= 0 && abs_points[i].y < BOARD_HEIGHT && abs_points[i].y >= 0) { //don't shoot ourselves in the foot indexing OOB
             int tile = board[abs_points[i].y][abs_points[i].x];
             if(tile != 0)
                 collision_flag |= T_BOUND_OVERLAP;
