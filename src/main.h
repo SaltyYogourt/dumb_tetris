@@ -8,6 +8,7 @@ enum { T_MOVE_STILL, T_MOVE_RIGHT, T_MOVE_LEFT };
 enum { ROT_DIR_CLOCKWISE = 1, ROT_DIR_COUNTERCLOCKWISE = -1 };
 
 void update_game(GameState *gamestate);
+void game_loop(GameState *gamestate);
 void movx(GameState *gamestate, int dir);
 void rot(GameState *gamestate, int dir);
 unsigned int get_lines(GameState *gamestate, unsigned int *lines);

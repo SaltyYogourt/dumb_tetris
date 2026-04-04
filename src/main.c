@@ -7,6 +7,7 @@
 #include "tetromino.h"
 #include "draw.h"
 #include "game.h"
+#include "state.h"
 
 
 void hard_drop(GameState *gamestate, bool sonicdrop){
@@ -71,11 +72,24 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     gamestate->window = NULL;
     gamestate->renderer = NULL;
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
+        SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+
+    if (!SDL_CreateWindowAndRenderer("examples/entry", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE, &gamestate->window, &gamestate->renderer)) {
+        SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+    SDL_SetRenderLogicalPresentation(gamestate->renderer, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+    SDL_SetRenderVSync(gamestate->renderer, 1);
+    SDL_SetRenderDrawBlendMode(gamestate->renderer, SDL_BLENDMODE_BLEND);
+    
     gamestate->last_tick = SDL_GetTicks();
     gamestate->gravity = 1.0f/64.0f;
     gamestate->gravity_step = 0.0f;
     gamestate->lock_time = LOCK_DELAY;
-    
+
     //initialize history to Z pieces. there's a reason why we do this, im sure
     SDL_memset(gamestate->piece_history_idx, T_Z, 4);
 
@@ -96,18 +110,15 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     SDL_GetCurrentTime(&time); 
     SDL_srand(time);
 
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
-        SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
+    State menu;
+    State gameplay;
+    State gameOver;
+    State pause;
+    State *current_state;
 
-    if (!SDL_CreateWindowAndRenderer("examples/entry", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE, &gamestate->window, &gamestate->renderer)) {
-        SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
-    SDL_SetRenderLogicalPresentation(gamestate->renderer, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);
-    SDL_SetRenderVSync(gamestate->renderer, 1);
-    SDL_SetRenderDrawBlendMode(gamestate->renderer, SDL_BLENDMODE_BLEND);
+    gameplay.update = game_loop;
+    gameplay.render = draw_game;
+    current_state = &gameplay;
 
     return SDL_APP_CONTINUE;  
 }
@@ -284,12 +295,9 @@ void update_game(GameState *gamestate)
         }
     }
 }
-
 Uint64 lag = 0;    
-SDL_AppResult SDL_AppIterate(void *appstate)
-{
+void game_loop(GameState *gamestate){
     const Uint64 current_ticks = SDL_GetTicks();
-    GameState *gamestate = appstate;
 
     gamestate->deltatime = current_ticks - gamestate->last_tick;
     gamestate->last_tick = current_ticks;
@@ -299,7 +307,13 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         update_game(gamestate);
         lag -= TICK;
     }
+}
 
+SDL_AppResult SDL_AppIterate(void *appstate)
+{
+    
+    GameState *gamestate = appstate;
+    game_loop(gamestate);
     draw_game(gamestate);
 
     SDL_Delay(1);
