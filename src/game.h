@@ -6,13 +6,14 @@
 #define MOVE_SPEED 16
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
-#define CELL_SIZE 24
 
 #define TICKRATE 60
 #define TICK (1000.0f/TICKRATE)
 
-#define WINDOW_WIDTH BOARD_WIDTH*CELL_SIZE
-#define WINDOW_HEIGHT BOARD_HEIGHT*CELL_SIZE
+//FIXME: we should read these from a config. alt: rename to "INIT_* ..."
+#define WINDOW_WIDTH  640
+#define WINDOW_HEIGHT 480
+
 
 /*
 // what you're refering to as C, is in fact, GNU/C.
@@ -29,10 +30,6 @@ typedef struct {
     SDL_Color color;
     Point offset[4][4]; //we ONLY have four offsets including 0,0, right? 
 } PieceData;
-
-typedef struct { //hardcode UI positions. we can deserialize later........
-    Point board_position;
-} UI;
 
 typedef struct {
     PieceData *tetromino;

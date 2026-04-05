@@ -4,6 +4,8 @@
 #include <SDL3/SDL.h>
 
 SDL_FRect rect;
+const int CELL_SIZE = WINDOW_WIDTH > WINDOW_HEIGHT ? WINDOW_HEIGHT/BOARD_HEIGHT : WINDOW_WIDTH/BOARD_WIDTH;
+int start_pos = (WINDOW_WIDTH/2)-(BOARD_WIDTH/2)*CELL_SIZE;
 
 void draw_game(GameState *gamestate){
     rect.w = rect.h = CELL_SIZE;
@@ -19,11 +21,12 @@ void draw_board(unsigned char (*board)[10], SDL_Renderer *renderer)
     SDL_RenderClear(renderer);
 
     int i,j;
+
         
     for(i = 0; BOARD_HEIGHT > i; i++){
         for(j = 0; BOARD_WIDTH > j; j++){
             if(board[i][j] == T_EMPTY) continue;
-            rect.x = j*CELL_SIZE;
+            rect.x = start_pos+(j*CELL_SIZE);
             rect.y = i*CELL_SIZE;
             if(board[i][j] == T_PLAYER) SDL_SetRenderDrawColor(renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
             else if(board[i][j] == T_BLOCK) SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
@@ -50,7 +53,7 @@ void draw_tetromino_on_board(int x, int y, PieceData *tetromino, int rot, SDL_Co
     get_abs_offsets(x, y, tetromino, rot, points_to_draw);
 
     for(i=0; 4 > i; ++i){
-        rect.x = points_to_draw[i].x*CELL_SIZE;
+        rect.x = start_pos+(points_to_draw[i].x*CELL_SIZE);
         rect.y = points_to_draw[i].y*CELL_SIZE;
         SDL_RenderFillRect(renderer,&rect);
     }
