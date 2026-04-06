@@ -39,7 +39,7 @@ typedef struct {
     PieceData *tetromino;
 } Player;
 
-typedef struct {
+typedef struct GameState {
     float gravity;
     float gravity_step;
     int lock_time;

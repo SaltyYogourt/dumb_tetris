@@ -7,8 +7,13 @@
 #include "tetromino.h"
 #include "draw.h"
 #include "game.h"
-#include "state.h"
+#include "event.h"
 
+static State menu;
+static State gameplay;
+static State gameOver;
+static State pause;
+static State *current_state;
 
 void hard_drop(GameState *gamestate, bool sonicdrop){
     gamestate->player.y = get_player_floor(&gamestate->player, gamestate->board);
@@ -110,14 +115,10 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     SDL_GetCurrentTime(&time); 
     SDL_srand(time);
 
-    State menu;
-    State gameplay;
-    State gameOver;
-    State pause;
-    State *current_state;
-
     gameplay.update = game_loop;
     gameplay.render = draw_game;
+    gameplay.input = gameplay_event;
+
     current_state = &gameplay;
 
     return SDL_APP_CONTINUE;  
@@ -130,40 +131,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
     if (event->type == SDL_EVENT_QUIT) {
         return SDL_APP_SUCCESS;  
     }
-    if (event->type == SDL_EVENT_KEY_DOWN){
-        switch (event->key.scancode){
-            case SDL_SCANCODE_D:
-                movx(gamestate, T_MOVE_RIGHT);
-                break;
-            case SDL_SCANCODE_A:
-                movx(gamestate, T_MOVE_LEFT);
-                break;
-            case SDL_SCANCODE_W:
-                rot(gamestate, ROT_DIR_CLOCKWISE);
-                break;
-            case SDL_SCANCODE_S:
-                rot(gamestate, ROT_DIR_COUNTERCLOCKWISE);
-                break;
-            case SDL_SCANCODE_P:
-                gamestate->gravity=2.0f;
-                break;
-            case SDL_SCANCODE_Q:
-                gamestate->gravity+=8/64.0f;
-                break;
-            case SDL_SCANCODE_E:
-                gamestate->gravity-=8/64.0f;
-                break;
-            case SDL_SCANCODE_R:
-                gamestate->player.y = 3;
-                gamestate->gravity_step = 0.0f;
-                break;
-            case SDL_SCANCODE_SPACE:
-                hard_drop(gamestate, false);
-                break;
-            default:
-                break;
-        }
-    }
+    
+    current_state->input(gamestate, event);
     return SDL_APP_CONTINUE;  
 }
 
@@ -313,8 +282,8 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 {
     
     GameState *gamestate = appstate;
-    game_loop(gamestate);
-    draw_game(gamestate);
+    current_state->update(gamestate);
+    current_state->render(gamestate);
 
     SDL_Delay(1);
     return SDL_APP_CONTINUE;  
