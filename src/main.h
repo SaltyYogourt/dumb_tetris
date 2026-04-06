@@ -4,8 +4,13 @@
 #include <SDL3/SDL.h>
 #include "game.h"
 
-enum { T_MOVE_STILL, T_MOVE_RIGHT, T_MOVE_LEFT };
-enum { ROT_DIR_CLOCKWISE = 1, ROT_DIR_COUNTERCLOCKWISE = -1 };
+typedef struct {
+    void (*update)(GameState *gamestate);
+    void (*render)(GameState *gamestate);
+    void (*input)(GameState *gamestate, SDL_Event *event);
+    void (*enter)(GameState *gamestate);
+    void (*exit)(GameState *gamestate);
+} State;
 
 void update_game(GameState *gamestate);
 void game_loop(GameState *gamestate);
