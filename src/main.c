@@ -120,6 +120,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     //gameplay.exit = pass;
 
     //we're going pointer chasing baby
+    gamestate->next_state = NULL;
     gamestate->current_state = &gamestate->states[STATE_GAMEPLAY];
 
     return SDL_APP_CONTINUE;  
@@ -297,9 +298,13 @@ void pause_exit(GameState *gamestate){
 
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
-    
     GameState *gamestate = appstate;
     gamestate->current_state->update(gamestate);
+
+    if(!changeState(gamestate)){
+        //TODO: if shit fucked up, do something
+    }
+
     gamestate->current_state->render(gamestate);
 
     SDL_Delay(1);

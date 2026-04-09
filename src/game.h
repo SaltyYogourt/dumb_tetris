@@ -55,6 +55,7 @@ typedef struct GameState {
     SDL_Window *window;
     SDL_Renderer *renderer;
     State *current_state;
+    State *next_state;
     State *states;
     unsigned char board[BOARD_HEIGHT][BOARD_WIDTH];
 } GameState;
