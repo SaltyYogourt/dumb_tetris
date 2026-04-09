@@ -21,6 +21,8 @@
 #define TETROMINO_RAND_RETRIES 4
 #define TETROMINO_HISTORY_LEN 4
 
+typedef struct State State;
+
 typedef struct {
     char x;
     char y;
@@ -39,17 +41,21 @@ typedef struct {
     PieceData *tetromino;
 } Player;
 
+//TODO: Poor choice of name in hindsight.
 typedef struct GameState {
     float gravity;
     float gravity_step;
     int lock_time;
     Uint64 last_tick;
+    Uint64 pause_tick;
     Uint64 deltatime;
     unsigned char piece_history_idx[4];
     PieceData piece_data[7];
+    Player player;
     SDL_Window *window;
     SDL_Renderer *renderer;
-    Player player;
+    State *current_state;
+    State *states;
     unsigned char board[BOARD_HEIGHT][BOARD_WIDTH];
 } GameState;
 

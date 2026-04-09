@@ -4,14 +4,6 @@
 #include <SDL3/SDL.h>
 #include "game.h"
 
-typedef struct {
-    void (*update)(GameState *gamestate);
-    void (*render)(GameState *gamestate);
-    void (*input)(GameState *gamestate, SDL_Event *event);
-    void (*enter)(GameState *gamestate);
-    void (*exit)(GameState *gamestate);
-} State;
-
 void update_game(GameState *gamestate);
 void game_loop(GameState *gamestate);
 void movx(GameState *gamestate, int dir);

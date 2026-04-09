@@ -8,12 +8,7 @@
 #include "draw.h"
 #include "game.h"
 #include "event.h"
-
-static State menu;
-static State gameplay;
-static State gameOver;
-static State pause;
-static State *current_state;
+#include "state.h"
 
 void hard_drop(GameState *gamestate, bool sonicdrop){
     gamestate->player.y = get_player_floor(&gamestate->player, gamestate->board);
@@ -115,11 +110,17 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     SDL_GetCurrentTime(&time); 
     SDL_srand(time);
 
-    gameplay.update = game_loop;
-    gameplay.render = draw_game;
-    gameplay.input = gameplay_event;
+    //State init
+    gamestate->states = (State*)SDL_malloc(sizeof(State)*STATES_COUNT);
 
-    current_state = &gameplay;
+    gamestate->states[STATE_GAMEPLAY].update = game_loop;
+    gamestate->states[STATE_GAMEPLAY].render = draw_game;
+    gamestate->states[STATE_GAMEPLAY].input = gameplay_event;
+    //gameplay.enter = pass;
+    //gameplay.exit = pass;
+
+    //we're going pointer chasing baby
+    gamestate->current_state = &gamestate->states[STATE_GAMEPLAY];
 
     return SDL_APP_CONTINUE;  
 }
@@ -132,7 +133,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         return SDL_APP_SUCCESS;  
     }
     
-    current_state->input(gamestate, event);
+    gamestate->current_state->input(gamestate, event);
     return SDL_APP_CONTINUE;  
 }
 
@@ -278,12 +279,28 @@ void game_loop(GameState *gamestate){
     }
 }
 
+void game_pause(GameState *gamestate){
+    //handle state change from "game" to "pause".
+}
+
+void pause_loop(GameState *gamestate){
+    //pass;
+}
+
+void pause_enter(GameState *gamestate){
+    gamestate->pause_tick = SDL_GetTicks();
+}
+
+void pause_exit(GameState *gamestate){
+    gamestate->last_tick += (SDL_GetTicks()-gamestate->pause_tick);
+}
+
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
     
     GameState *gamestate = appstate;
-    current_state->update(gamestate);
-    current_state->render(gamestate);
+    gamestate->current_state->update(gamestate);
+    gamestate->current_state->render(gamestate);
 
     SDL_Delay(1);
     return SDL_APP_CONTINUE;  
