@@ -1,6 +1,7 @@
 #include "event.h"
 #include "game.h"
 #include "main.h"
+#include "state.h"
 
 void gameplay_event(GameState *gamestate, SDL_Event *event){
     if (event->type == SDL_EVENT_KEY_DOWN){
@@ -18,7 +19,7 @@ void gameplay_event(GameState *gamestate, SDL_Event *event){
                 rot(gamestate, ROT_DIR_COUNTERCLOCKWISE);
                 break;
             case SDL_SCANCODE_P:
-                gamestate->gravity=2.0f;
+                gamestate->next_state = &gamestate->states[STATE_PAUSE];
                 break;
             case SDL_SCANCODE_Q:
                 gamestate->gravity+=8/64.0f;
@@ -38,3 +39,16 @@ void gameplay_event(GameState *gamestate, SDL_Event *event){
         }
     }
 }
+
+void pause_event(GameState *gamestate, SDL_Event *event){
+    if (event->type == SDL_EVENT_KEY_DOWN){
+        switch (event->key.scancode){
+            case SDL_SCANCODE_P:
+                gamestate->next_state = &gamestate->states[STATE_GAMEPLAY];
+                break;
+            default:
+                break;
+        }
+    }
+}
+

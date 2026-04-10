@@ -62,6 +62,10 @@ unsigned char get_random_tetromino(unsigned char history[4]){
     return piece_idx;
 }
 
+void enter_exit_placeholder(GameState *gamestate){
+
+}
+
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
     SDL_SetAppMetadata("Stupid Tetris Clone", "1.0", "com.saltyyogourt.tetrisclone");
@@ -116,8 +120,14 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     gamestate->states[STATE_GAMEPLAY].update = game_loop;
     gamestate->states[STATE_GAMEPLAY].render = draw_game;
     gamestate->states[STATE_GAMEPLAY].input = gameplay_event;
-    //gameplay.enter = pass;
-    //gameplay.exit = pass;
+    gamestate->states[STATE_GAMEPLAY].enter = enter_exit_placeholder;
+    gamestate->states[STATE_GAMEPLAY].exit = enter_exit_placeholder;
+
+    gamestate->states[STATE_PAUSE].update = pause_loop; 
+    gamestate->states[STATE_PAUSE].render = draw_pause;
+    gamestate->states[STATE_PAUSE].input = pause_event;
+    gamestate->states[STATE_PAUSE].enter = pause_enter;
+    gamestate->states[STATE_PAUSE].exit = pause_exit;
 
     //we're going pointer chasing baby
     gamestate->next_state = NULL;
@@ -125,6 +135,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     return SDL_APP_CONTINUE;  
 }
+
 
 
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
