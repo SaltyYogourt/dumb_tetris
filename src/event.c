@@ -19,7 +19,7 @@ void gameplay_event(GameState *gamestate, SDL_Event *event){
                 rot(gamestate, ROT_DIR_COUNTERCLOCKWISE);
                 break;
             case SDL_SCANCODE_P:
-                gamestate->next_state = &gamestate->states[STATE_PAUSE];
+                setNextState(gamestate, &gamestate->states[STATE_PAUSE]);
                 break;
             case SDL_SCANCODE_Q:
                 gamestate->gravity+=8/64.0f;
@@ -44,7 +44,7 @@ void pause_event(GameState *gamestate, SDL_Event *event){
     if (event->type == SDL_EVENT_KEY_DOWN){
         switch (event->key.scancode){
             case SDL_SCANCODE_P:
-                gamestate->next_state = &gamestate->states[STATE_GAMEPLAY];
+                setNextState(gamestate, &gamestate->states[STATE_GAMEPLAY]);
                 break;
             default:
                 break;
