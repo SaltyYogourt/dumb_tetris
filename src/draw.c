@@ -3,16 +3,29 @@
 #include "game.h"
 #include <SDL3/SDL.h>
 
+#define SMALL_WINDOW_WIDTH_PADDING 0.015f
+#define SMALL_WINDOW_WIDTH_FRACTION (WINDOW_WIDTH/4.0f)-(SMALL_WINDOW_WIDTH_PADDING*2)
+#define SMALL_WINDOW_HEIGHT_FRACTION 0.3f
+#define SMALL_WINDOW_TITLE_FRACTION 0.2f
+
 SDL_FRect rect;
 const int CELL_SIZE = WINDOW_WIDTH > WINDOW_HEIGHT ? WINDOW_HEIGHT/BOARD_HEIGHT : WINDOW_WIDTH/BOARD_WIDTH;
+const int small_window_w = WINDOW_WIDTH*SMALL_WINDOW_WIDTH_FRACTION;
+const int small_window_h = WINDOW_HEIGHT*SMALL_WINDOW_HEIGHT_FRACTION;
+const int small_window_title_height = small_window_w*SMALL_WINDOW_TITLE_FRACTION;
 int start_pos = (WINDOW_WIDTH/2)-(BOARD_WIDTH/2)*CELL_SIZE;
 
 void draw_game(GameState *gamestate){
     rect.w = rect.h = CELL_SIZE;
+    SDL_Log("screen width: %d; board width: %d", WINDOW_WIDTH, BOARD_WIDTH*CELL_SIZE);
     draw_board(gamestate->board, gamestate->renderer);
     draw_player(&gamestate->player, gamestate->renderer);
     draw_player_shadow(&gamestate->player, gamestate->board, gamestate->renderer);
     SDL_RenderPresent(gamestate->renderer);
+}
+
+void draw_small_window(char *title, int pos){
+    
 }
 
 void draw_board(unsigned char (*board)[10], SDL_Renderer *renderer)
