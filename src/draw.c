@@ -2,6 +2,7 @@
 #include "tetromino.h"
 #include "game.h"
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_stdinc.h>
 
 enum {  SMALL_WINDOW_BOTTOM = 0b01,
         SMALL_WINDOW_RIGHT  = 0b10,
@@ -30,6 +31,13 @@ const int small_window_h = WINDOW_HEIGHT*SMALL_WINDOW_HEIGHT_FRACTION;
 const int small_window_title_height = small_window_w*SMALL_WINDOW_TITLE_FRACTION;
 int start_pos = (WINDOW_WIDTH/2)-(BOARD_WIDTH/2)*CELL_SIZE;
 
+void debug_gravity(GameState *gamestate){
+    char debug_text[64];
+    SDL_snprintf(debug_text, 64, "%f, x: %d, y: %d, idx: %d", gamestate->gravity, gamestate->player.x, gamestate->player.y, gamestate->player.tetromino_id);
+    SDL_SetRenderDrawColor(gamestate->renderer, 255,255,255,255);
+    SDL_RenderDebugText(gamestate->renderer, 0, 24, debug_text);
+}
+
 void draw_game(GameState *gamestate){
     SDL_SetRenderDrawColor(gamestate->renderer, 16, 16, 16, SDL_ALPHA_OPAQUE);  
     SDL_RenderClear(gamestate->renderer);
@@ -41,6 +49,20 @@ void draw_game(GameState *gamestate){
     draw_small_window(gamestate->renderer, "placeholder", SMALL_WINDOW_BOTTOM_LEFT);
     draw_small_window(gamestate->renderer, "placeholder", SMALL_WINDOW_TOP_RIGHT);
     draw_small_window(gamestate->renderer, "placeholder", SMALL_WINDOW_BOTTOM_RIGHT);
+    debug_gravity(gamestate);
+    SDL_RenderPresent(gamestate->renderer);
+}
+
+void draw_pause(GameState *gamestate){
+    SDL_SetRenderDrawColor(gamestate->renderer, 64,192,192,128);
+    SDL_FRect some_rect = {
+        .x = 10,
+        .y = 10,
+        .w = 220,
+        .h = 460,
+    };
+
+    SDL_RenderFillRect(gamestate->renderer,&some_rect);
     SDL_RenderPresent(gamestate->renderer);
 }
 

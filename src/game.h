@@ -21,6 +21,15 @@
 typedef float Vector2 __attribute__ ((vector_size(sizeof(float)*2)));
 */
 
+#define LOCK_DELAY 8*TICK
+
+#define STARTING_Y 0
+
+#define TETROMINO_RAND_RETRIES 4
+#define TETROMINO_HISTORY_LEN 4
+
+typedef struct State State;
+
 typedef struct {
     char x;
     char y;
@@ -32,22 +41,28 @@ typedef struct {
 } PieceData;
 
 typedef struct {
-    PieceData *tetromino;
-    unsigned char x;
-    unsigned char y;
+    char x;
+    char y;
     unsigned char tetromino_id;
     char rot;
 } Player;
 
-typedef struct {
+//TODO: Poor choice of name in hindsight.
+typedef struct GameState {
     float gravity;
     float gravity_step;
+    int lock_time;
+    Uint64 last_tick;
+    Uint64 pause_tick;
+    Uint64 deltatime;
+    unsigned char piece_history_idx[4];
+    PieceData piece_data[7];
     SDL_Window *window;
     SDL_Renderer *renderer;
     Player player;
-    Uint64 last_tick;
-    Uint64 deltatime;
-    PieceData piece_data[7];
+    State *current_state;
+    State *next_state;
+    State *states;
     unsigned char board[BOARD_HEIGHT][BOARD_WIDTH];
 } GameState;
 

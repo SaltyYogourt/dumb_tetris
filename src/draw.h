@@ -6,6 +6,7 @@
 
 void draw_game(GameState *gamestate);
 void draw_small_window(SDL_Renderer *renderer, char *title, int pos);
+void draw_pause(GameState *gamestate);
 void draw_board(unsigned char (*board)[10], SDL_Renderer *renderer);
 void draw_player(Player *player, SDL_Renderer *renderer);
 void draw_player_shadow(Player *player, unsigned char (*board)[10], SDL_Renderer *renderer);

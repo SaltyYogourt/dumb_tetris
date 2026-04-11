@@ -11,8 +11,8 @@ DEPS			= $(OBJS:.o=.d)
 CFLAGS 			:= -Wall -Wextra
 OPTIMIZE_FLAGS 		:= -O3
 DEBUG_FLAGS 		= -g
-DEBUG3_FLAGS 		= -ggdb3
-LINKER_FLAGS 		= -lSDL3
+DEBUG3_FLAGS 		= -ggdb3 -fno-stack-protector
+LINKER_FLAGS 		= -lSDL3 -lSDL3_ttf
 OBJ_NAME 		= main
 
 $(BUILD_DIR):
