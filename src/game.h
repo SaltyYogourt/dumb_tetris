@@ -6,13 +6,20 @@
 #define MOVE_SPEED 16
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
-#define CELL_SIZE 24
 
 #define TICKRATE 60
 #define TICK (1000.0f/TICKRATE)
 
-#define WINDOW_WIDTH BOARD_WIDTH*CELL_SIZE
-#define WINDOW_HEIGHT BOARD_HEIGHT*CELL_SIZE
+//FIXME: we should read these from a config. alt: rename to "INIT_* ..."
+#define WINDOW_WIDTH  640
+#define WINDOW_HEIGHT 480
+
+
+/*
+// what you're refering to as C, is in fact, GNU/C.
+// this won't port to MSVC easily. use mingw?
+typedef float Vector2 __attribute__ ((vector_size(sizeof(float)*2)));
+*/
 
 #define LOCK_DELAY 8*TICK
 
@@ -51,9 +58,9 @@ typedef struct GameState {
     Uint64 deltatime;
     unsigned char piece_history_idx[4];
     PieceData piece_data[7];
-    Player player;
     SDL_Window *window;
     SDL_Renderer *renderer;
+    Player player;
     State *current_state;
     State *next_state;
     State *states;
