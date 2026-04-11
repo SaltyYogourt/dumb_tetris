@@ -4,6 +4,11 @@
 #include <SDL3/SDL.h>
 #include "game.h"
 
+typedef struct LevelData{
+    unsigned short level;
+    unsigned short gravity;
+} LevelData;
+
 void update_game(GameState *gamestate);
 void game_loop(GameState *gamestate);
 void movx(GameState *gamestate, int dir);
