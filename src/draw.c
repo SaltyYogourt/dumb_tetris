@@ -3,38 +3,68 @@
 #include "game.h"
 #include <SDL3/SDL.h>
 
-#define SMALL_WINDOW_WIDTH_PADDING 0.015f
-#define SMALL_WINDOW_WIDTH_FRACTION (WINDOW_WIDTH/4.0f)-(SMALL_WINDOW_WIDTH_PADDING*2)
+enum {  SMALL_WINDOW_BOTTOM = 0b01,
+        SMALL_WINDOW_RIGHT  = 0b10,
+};
+
+enum {  SMALL_WINDOW_TOP_LEFT,
+        SMALL_WINDOW_BOTTOM_LEFT = SMALL_WINDOW_BOTTOM,
+        SMALL_WINDOW_TOP_RIGHT = SMALL_WINDOW_RIGHT,
+        SMALL_WINDOW_BOTTOM_RIGHT = SMALL_WINDOW_RIGHT | SMALL_WINDOW_BOTTOM,
+};
+
+#define SMALL_WINDOW_WIDTH_PADDING 0.05f
+#define SMALL_WINDOW_HEIGHT_PADDING 0.015f
 #define SMALL_WINDOW_HEIGHT_FRACTION 0.3f
 #define SMALL_WINDOW_TITLE_FRACTION 0.2f
 
+//warning! every function is responsible for setting rect's attributes on its own!!!!!
 SDL_FRect rect;
 const int CELL_SIZE = WINDOW_WIDTH > WINDOW_HEIGHT ? WINDOW_HEIGHT/BOARD_HEIGHT : WINDOW_WIDTH/BOARD_WIDTH;
-const int small_window_w = WINDOW_WIDTH*SMALL_WINDOW_WIDTH_FRACTION;
+const float GAME_BOARD_WIDTH = CELL_SIZE*BOARD_WIDTH;
+const int game_board_clear_size = (WINDOW_WIDTH-GAME_BOARD_WIDTH)/2; //FIXME: sane name needed
+const int small_window_w_padding = game_board_clear_size*SMALL_WINDOW_WIDTH_PADDING;
+const int small_window_h_padding = WINDOW_HEIGHT*SMALL_WINDOW_HEIGHT_PADDING;
+const int small_window_w = game_board_clear_size-(small_window_w_padding*2);
 const int small_window_h = WINDOW_HEIGHT*SMALL_WINDOW_HEIGHT_FRACTION;
 const int small_window_title_height = small_window_w*SMALL_WINDOW_TITLE_FRACTION;
 int start_pos = (WINDOW_WIDTH/2)-(BOARD_WIDTH/2)*CELL_SIZE;
 
 void draw_game(GameState *gamestate){
-    rect.w = rect.h = CELL_SIZE;
-    SDL_Log("screen width: %d; board width: %d", WINDOW_WIDTH, BOARD_WIDTH*CELL_SIZE);
+    SDL_SetRenderDrawColor(gamestate->renderer, 16, 16, 16, SDL_ALPHA_OPAQUE);  
+    SDL_RenderClear(gamestate->renderer);
+    //SDL_Log("screen width: %d; board width: %d", WINDOW_WIDTH, BOARD_WIDTH*CELL_SIZE);
     draw_board(gamestate->board, gamestate->renderer);
     draw_player(&gamestate->player, gamestate->renderer);
     draw_player_shadow(&gamestate->player, gamestate->board, gamestate->renderer);
+    draw_small_window(gamestate->renderer, "placeholder", SMALL_WINDOW_TOP_LEFT);
+    draw_small_window(gamestate->renderer, "placeholder", SMALL_WINDOW_BOTTOM_LEFT);
+    draw_small_window(gamestate->renderer, "placeholder", SMALL_WINDOW_TOP_RIGHT);
+    draw_small_window(gamestate->renderer, "placeholder", SMALL_WINDOW_BOTTOM_RIGHT);
     SDL_RenderPresent(gamestate->renderer);
 }
 
-void draw_small_window(char *title, int pos){
-    
+void draw_small_window(SDL_Renderer *renderer, char *title, int pos){
+    rect.w = small_window_w;
+    rect.h = small_window_h;
+
+    //TODO: evaulate if these operations are worth what we save in eliminating branches
+    //FIXME: we cast the results to bools so any >1 value becomes 1. find cleaner way to do this?
+    rect.x = SDL_abs(((WINDOW_WIDTH-small_window_w)*(bool)(pos & SMALL_WINDOW_RIGHT)) - small_window_w_padding);
+    rect.y = SDL_abs(((WINDOW_HEIGHT-small_window_h)*(bool)(pos & SMALL_WINDOW_BOTTOM)) - small_window_h_padding);
+  
+    SDL_SetRenderDrawColor(renderer, 16, 192, 16, SDL_ALPHA_OPAQUE);  
+    SDL_RenderFillRect(renderer, &rect);
+    SDL_SetRenderDrawColor(renderer, 16, 96, 16, SDL_ALPHA_OPAQUE);  
+    rect.h = small_window_title_height;
+    SDL_RenderFillRect(renderer, &rect);
 }
 
 void draw_board(unsigned char (*board)[10], SDL_Renderer *renderer)
 {
-    SDL_SetRenderDrawColor(renderer, 16, 16, 16, SDL_ALPHA_OPAQUE);  
-    SDL_RenderClear(renderer);
+    rect.w = rect.h = CELL_SIZE;
 
     int i,j;
-
         
     for(i = 0; BOARD_HEIGHT > i; i++){
         for(j = 0; BOARD_WIDTH > j; j++){
@@ -60,6 +90,7 @@ void draw_player_shadow(Player *player, unsigned char (*board)[10], SDL_Renderer
 }
 
 void draw_tetromino_on_board(int x, int y, PieceData *tetromino, int rot, SDL_Color color, SDL_Renderer *renderer){
+    rect.w = rect.h = CELL_SIZE;
     int i;
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
     Point points_to_draw[4];
