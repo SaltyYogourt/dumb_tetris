@@ -22,6 +22,18 @@ void draw_game(GameState *gamestate){
     SDL_RenderPresent(gamestate->renderer);
 }
 
+void draw_pause(GameState *gamestate){
+    SDL_SetRenderDrawColor(gamestate->renderer, 64,192,192,128);
+    SDL_FRect some_rect = {
+        .x = 10,
+        .y = 10,
+        .w = 220,
+        .h = 460,
+    };
+
+    SDL_RenderFillRect(gamestate->renderer,&some_rect);
+    SDL_RenderPresent(gamestate->renderer);
+}
 
 void draw_board(unsigned char (*board)[10], SDL_Renderer *renderer)
 {
