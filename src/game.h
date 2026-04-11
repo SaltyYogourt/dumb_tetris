@@ -45,6 +45,7 @@ typedef struct {
     char y;
     unsigned char tetromino_id;
     char rot;
+    PieceData *tetromino;
 } Player;
 
 //TODO: Poor choice of name in hindsight.
