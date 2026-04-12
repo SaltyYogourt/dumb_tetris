@@ -10,6 +10,34 @@
 #include "event.h"
 #include "state.h"
 
+static LevelData lup_list[14];
+static short lup_point = 0;
+
+LevelData *get_level_up_data(short level){
+    LevelData *data = NULL;
+    for(short i = lup_point; 14 > i; ++i){
+        short data_level = lup_list[i].level;
+        if (data_level == level){
+            lup_point = i;
+            data = lup_list+i;
+            break;
+        }
+        else if (data_level > level){
+            break;
+        }
+    }
+    return data;
+}
+
+void level_up(GameState *gamestate, int lines_cleared){
+    while(lines_cleared--){
+        LevelData *lup_data = get_level_up_data(++(gamestate->level));
+        if(lup_data){
+            gamestate->gravity = lup_data->gravity;
+        }
+    }
+}
+
 void hard_drop(GameState *gamestate, bool sonicdrop){
     gamestate->player.y = get_player_floor(&gamestate->player, gamestate->board);
     if(!sonicdrop)
