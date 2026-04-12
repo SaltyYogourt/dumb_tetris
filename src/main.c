@@ -29,12 +29,13 @@ LevelData *get_level_up_data(short level){
     return data;
 }
 
-void level_up(GameState *gamestate, int lines_cleared){
-    while(lines_cleared--){
-        LevelData *lup_data = get_level_up_data(++(gamestate->level));
-        if(lup_data){
-            gamestate->gravity = lup_data->gravity;
-        }
+void level_up_(GameState *gamestate, short level){
+    LevelData *lup_data = get_level_up_data(level);
+    if(lup_data){
+        gamestate->gravity = lup_data->gravity;
+        //TODO: if we have other stuff to adjust, do it here.
+        //FIXME: have handling for any NULL/0 values. we have an issue where if we want to only update certain values per level
+        //rather than everything, we will try to update them all.
     }
 }
 
@@ -287,10 +288,13 @@ void update_game(GameState *gamestate)
         if(--gamestate->lock_time < 0){
             lock_piece(gamestate);
             int lines = get_lines(gamestate, lines_to_kill);
+            LevelData *lup_data = NULL;
             if(lines){ 
                 for(int i = 0; lines > i; ++i){
                     //when we collapse a line the next line to collapse goes down by 1 each time--AKA, each line is "i" times lower.
                     collapse_line(gamestate, (lines_to_kill[i])+i);
+                    if((lup_data = get_level_up_data(++(gamestate->level)))){
+                    }
                 }
             }
             //TODO: use lines for score
