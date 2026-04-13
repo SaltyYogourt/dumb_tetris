@@ -4,31 +4,31 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_stdinc.h>
 
-enum {  SMALL_WINDOW_BOTTOM = 0b01,
-        SMALL_WINDOW_RIGHT  = 0b10,
+enum {  CORNER_DISPLAY_BOTTOM = 0b01,
+        CORNER_DISPLAY_RIGHT  = 0b10,
 };
 
-enum {  SMALL_WINDOW_TOP_LEFT,
-        SMALL_WINDOW_BOTTOM_LEFT = SMALL_WINDOW_BOTTOM,
-        SMALL_WINDOW_TOP_RIGHT = SMALL_WINDOW_RIGHT,
-        SMALL_WINDOW_BOTTOM_RIGHT = SMALL_WINDOW_RIGHT | SMALL_WINDOW_BOTTOM,
+enum {  CORNER_DISPLAY_TOP_LEFT,
+        CORNER_DISPLAY_BOTTOM_LEFT = CORNER_DISPLAY_BOTTOM,
+        CORNER_DISPLAY_TOP_RIGHT = CORNER_DISPLAY_RIGHT,
+        CORNER_DISPLAY_BOTTOM_RIGHT = CORNER_DISPLAY_RIGHT | CORNER_DISPLAY_BOTTOM,
 };
 
-#define SMALL_WINDOW_WIDTH_PADDING 0.05f
-#define SMALL_WINDOW_HEIGHT_PADDING 0.015f
-#define SMALL_WINDOW_HEIGHT_FRACTION 0.3f
-#define SMALL_WINDOW_TITLE_FRACTION 0.2f
+#define CORNER_DISPLAY_WIDTH_PADDING 0.05f
+#define CORNER_DISPLAY_HEIGHT_PADDING 0.015f
+#define CORNER_DISPLAY_HEIGHT_FRACTION 0.3f
+#define CORNER_DISPLAY_TITLE_FRACTION 0.2f
 
 //warning! every function is responsible for setting rect's attributes on its own!!!!!
 SDL_FRect rect;
 const int CELL_SIZE = WINDOW_WIDTH > WINDOW_HEIGHT ? WINDOW_HEIGHT/BOARD_HEIGHT : WINDOW_WIDTH/BOARD_WIDTH;
 const float GAME_BOARD_WIDTH = CELL_SIZE*BOARD_WIDTH;
 const int game_board_clear_size = (WINDOW_WIDTH-GAME_BOARD_WIDTH)/2; //FIXME: sane name needed
-const int small_window_w_padding = game_board_clear_size*SMALL_WINDOW_WIDTH_PADDING;
-const int small_window_h_padding = WINDOW_HEIGHT*SMALL_WINDOW_HEIGHT_PADDING;
-const int small_window_w = game_board_clear_size-(small_window_w_padding*2);
-const int small_window_h = WINDOW_HEIGHT*SMALL_WINDOW_HEIGHT_FRACTION;
-const int small_window_title_height = small_window_w*SMALL_WINDOW_TITLE_FRACTION;
+const int corner_display_w_padding = game_board_clear_size*CORNER_DISPLAY_WIDTH_PADDING;
+const int corner_display_h_padding = WINDOW_HEIGHT*CORNER_DISPLAY_HEIGHT_PADDING;
+const int corner_display_w = game_board_clear_size-(corner_display_w_padding*2);
+const int corner_display_h = WINDOW_HEIGHT*CORNER_DISPLAY_HEIGHT_FRACTION;
+const int corner_display_title_height = corner_display_w*CORNER_DISPLAY_TITLE_FRACTION;
 int start_pos = (WINDOW_WIDTH/2)-(BOARD_WIDTH/2)*CELL_SIZE;
 
 void debug_gravity(GameState *gamestate){
@@ -45,10 +45,10 @@ void draw_game(GameState *gamestate){
     draw_board(gamestate->board, gamestate->renderer);
     draw_player(&gamestate->player, gamestate->renderer);
     draw_player_shadow(&gamestate->player, gamestate->board, gamestate->renderer);
-    draw_small_window(gamestate->renderer, "placeholder", SMALL_WINDOW_TOP_LEFT);
-    draw_small_window(gamestate->renderer, "placeholder", SMALL_WINDOW_BOTTOM_LEFT);
-    draw_small_window(gamestate->renderer, "placeholder", SMALL_WINDOW_TOP_RIGHT);
-    draw_small_window(gamestate->renderer, "placeholder", SMALL_WINDOW_BOTTOM_RIGHT);
+    draw_corner_display(gamestate->renderer, "placeholder", CORNER_DISPLAY_TOP_LEFT);
+    draw_corner_display(gamestate->renderer, "placeholder", CORNER_DISPLAY_BOTTOM_LEFT);
+    draw_corner_display(gamestate->renderer, "placeholder", CORNER_DISPLAY_TOP_RIGHT);
+    draw_corner_display(gamestate->renderer, "placeholder", CORNER_DISPLAY_BOTTOM_RIGHT);
     debug_gravity(gamestate);
     SDL_RenderPresent(gamestate->renderer);
 }
@@ -66,19 +66,19 @@ void draw_pause(GameState *gamestate){
     SDL_RenderPresent(gamestate->renderer);
 }
 
-void draw_small_window(SDL_Renderer *renderer, char *title, int pos){
-    rect.w = small_window_w;
-    rect.h = small_window_h;
+void draw_corner_display(SDL_Renderer *renderer, char *title, int pos){
+    rect.w = corner_display_w;
+    rect.h = corner_display_h;
 
     //TODO: evaulate if these operations are worth what we save in eliminating branches
     //FIXME: we cast the results to bools so any >1 value becomes 1. find cleaner way to do this?
-    rect.x = SDL_abs(((WINDOW_WIDTH-small_window_w)*(bool)(pos & SMALL_WINDOW_RIGHT)) - small_window_w_padding);
-    rect.y = SDL_abs(((WINDOW_HEIGHT-small_window_h)*(bool)(pos & SMALL_WINDOW_BOTTOM)) - small_window_h_padding);
+    rect.x = SDL_abs(((WINDOW_WIDTH-corner_display_w)*(bool)(pos & CORNER_DISPLAY_RIGHT)) - corner_display_w_padding);
+    rect.y = SDL_abs(((WINDOW_HEIGHT-corner_display_h)*(bool)(pos & CORNER_DISPLAY_BOTTOM)) - corner_display_h_padding);
   
     SDL_SetRenderDrawColor(renderer, 16, 192, 16, SDL_ALPHA_OPAQUE);  
     SDL_RenderFillRect(renderer, &rect);
     SDL_SetRenderDrawColor(renderer, 16, 96, 16, SDL_ALPHA_OPAQUE);  
-    rect.h = small_window_title_height;
+    rect.h = corner_display_title_height;
     SDL_RenderFillRect(renderer, &rect);
 }
 
