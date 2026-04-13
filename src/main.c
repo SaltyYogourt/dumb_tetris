@@ -10,6 +10,95 @@
 #include "event.h"
 #include "state.h"
 
+#define LUP_LIST_COUNT 14
+
+static LevelData lup_list[LUP_LIST_COUNT];
+static short lup_point = 0;
+
+//replace this by serializing data from a config or something?
+void init_lup_data(){
+    //https://tetris.wiki/Tetris_The_Grand_Master_3_Terror-Instinct#Speed_timings_2
+    lup_list[0] = (LevelData){ 
+        .level = 0,
+        .gravity = 4.0f,
+    };
+    lup_list[1] = (LevelData){ 
+        .level = 20,
+        .gravity = 32.0f,
+    };
+    lup_list[2] = (LevelData){ 
+        .level = 30,
+        .gravity = 64.0f,
+    };
+    lup_list[3] = (LevelData){ 
+        .level = 33,
+        .gravity = 96.0f,
+    };
+    lup_list[4] = (LevelData){ 
+        .level = 36,
+        .gravity = 128.0f,
+    };
+    lup_list[5] = (LevelData){ 
+        .level = 39,
+        .gravity = 160.0f,
+    };
+    lup_list[6] = (LevelData){ 
+        .level = 43,
+        .gravity = 192.0f,
+    };
+    lup_list[7] = (LevelData){ 
+        .level = 47,
+        .gravity = 224.0f,
+    };
+    lup_list[8] = (LevelData){ 
+        .level = 51,
+        .gravity = 256.0f,
+    };
+    lup_list[9] = (LevelData){ 
+        .level = 100,
+        .gravity = 512.0f,
+    };
+    lup_list[10] = (LevelData){ 
+        .level = 130,
+        .gravity = 768.0f,
+    };
+    lup_list[11] = (LevelData){ 
+        .level = 160,
+        .gravity = 1024.0f,
+    };
+    lup_list[12] = (LevelData){ 
+        .level = 250,
+        .gravity = 768.0f,
+    };
+    lup_list[13] = (LevelData){ 
+        .level = 300,
+        .gravity = 5120.0f,
+    };
+}
+
+LevelData *get_level_up_data(short level){
+    LevelData *data = NULL;
+    for(short i = lup_point; LUP_LIST_COUNT > i; ++i){
+        short data_level = lup_list[i].level;
+        if (data_level == level){
+            lup_point = i;
+            data = lup_list+i;
+            break;
+        }
+        else if (data_level > level){
+            break;
+        }
+    }
+    return data;
+}
+
+void commit_level_up(GameState *gamestate, LevelData *lup_data){
+    gamestate->gravity = lup_data->gravity/256.0f;
+    //TODO: if we have other stuff to adjust, do it here.
+    //FIXME: have handling for any NULL/0 values. we have an issue where if we want to only update certain values per level
+    //rather than everything, we will try to update them all.
+}
+
 void hard_drop(GameState *gamestate, bool sonicdrop){
     gamestate->player.y = get_player_floor(&gamestate->player, gamestate->board);
     if(!sonicdrop)
@@ -132,6 +221,12 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     //we're going pointer chasing baby
     gamestate->next_state = NULL;
     gamestate->current_state = &gamestate->states[STATE_GAMEPLAY];
+
+    init_lup_data();
+    LevelData *lup_data = NULL;
+    if((lup_data = get_level_up_data(gamestate->level))){
+        commit_level_up(gamestate, lup_data);
+    }
 
     return SDL_APP_CONTINUE;  
 }
@@ -259,10 +354,14 @@ void update_game(GameState *gamestate)
         if(--gamestate->lock_time < 0){
             lock_piece(gamestate);
             int lines = get_lines(gamestate, lines_to_kill);
+            LevelData *lup_data = NULL;
             if(lines){ 
                 for(int i = 0; lines > i; ++i){
                     //when we collapse a line the next line to collapse goes down by 1 each time--AKA, each line is "i" times lower.
                     collapse_line(gamestate, (lines_to_kill[i])+i);
+                    if((lup_data = get_level_up_data(++(gamestate->level)))){
+                        commit_level_up(gamestate, lup_data);
+                    }
                 }
             }
             //TODO: use lines for score

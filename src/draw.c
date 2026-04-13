@@ -33,7 +33,7 @@ int start_pos = (WINDOW_WIDTH/2)-(BOARD_WIDTH/2)*CELL_SIZE;
 
 void debug_gravity(GameState *gamestate){
     char debug_text[64];
-    SDL_snprintf(debug_text, 64, "%f, x: %d, y: %d, idx: %d", gamestate->gravity, gamestate->player.x, gamestate->player.y, gamestate->player.tetromino_id);
+    SDL_snprintf(debug_text, 64, "%f, x: %d, y: %d, idx: %d\nlevel: %d", gamestate->gravity, gamestate->player.x, gamestate->player.y, gamestate->player.tetromino_id, gamestate->level);
     SDL_SetRenderDrawColor(gamestate->renderer, 255,255,255,255);
     SDL_RenderDebugText(gamestate->renderer, 0, 24, debug_text);
 }

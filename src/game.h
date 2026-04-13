@@ -52,6 +52,7 @@ typedef struct {
 typedef struct GameState {
     float gravity;
     float gravity_step;
+    short level;
     int lock_time;
     Uint64 last_tick;
     Uint64 pause_tick;
