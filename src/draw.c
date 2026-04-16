@@ -50,9 +50,17 @@ void draw_game(GameState *gamestate){
     draw_board(gamestate->board, gamestate->renderer);
     draw_player(&gamestate->player, gamestate->renderer);
     draw_player_shadow(&gamestate->player, gamestate->board, gamestate->renderer);
+
+    //Next display
     calculate_corner_display(&next_tetromino_corner_display, CORNER_DISPLAY_TOP_RIGHT, "");
     draw_corner_display(gamestate->renderer, &next_tetromino_corner_display);
-    draw_tetromino_in_corner_display(gamestate->renderer, &next_tetromino_corner_display, &gamestate->piece_data[T_I]);
+    draw_tetromino_in_corner_display(gamestate->renderer, &next_tetromino_corner_display, &gamestate->piece_data[gamestate->next_tetromino_id]);
+
+    calculate_corner_display(&held_tetromino_corner_display, CORNER_DISPLAY_TOP_LEFT, "");
+    draw_corner_display(gamestate->renderer, &held_tetromino_corner_display);
+    if(gamestate->player.held_tetromino_id != 255){
+        draw_tetromino_in_corner_display(gamestate->renderer, &held_tetromino_corner_display, &gamestate->piece_data[gamestate->player.held_tetromino_id]);
+    }
     debug_gravity(gamestate);
     SDL_RenderPresent(gamestate->renderer);
 }
