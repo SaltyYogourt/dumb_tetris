@@ -110,7 +110,7 @@ bool center_column_rule(GameState *gamestate, char rot){
     if(player->tetromino_id == T_I) return true; 
     Point abs_points[4];
     char virtual_board[3][3];
-    for(i = 0; i < 3; i++) SDL_memset(virtual_board[i], 0, 3);
+    SDL_memset(virtual_board, 0, 9);
     for(i = 0; i < 4; i++){
         virtual_board[(player->tetromino->offset[rot][i].y+1)][player->tetromino->offset[rot][i].x+1] = T_PLAYER;
     }
