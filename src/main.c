@@ -76,6 +76,13 @@ void init_lup_data(){
     };
 }
 
+void hold_tetromino(Player *player){
+    if(!player->held_piece){
+        player->held_piece = player->tetromino;
+        //spawn new
+    }
+}
+
 LevelData *get_level_up_data(short level){
     LevelData *data = NULL;
     for(short i = lup_point; LUP_LIST_COUNT > i; ++i){

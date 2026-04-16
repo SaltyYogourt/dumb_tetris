@@ -45,6 +45,7 @@ typedef struct {
     char y;
     unsigned char tetromino_id;
     char rot;
+    PieceData *held_piece;
     PieceData *tetromino;
 } Player;
 
@@ -62,6 +63,7 @@ typedef struct GameState {
     SDL_Window *window;
     SDL_Renderer *renderer;
     Player player;
+    PieceData *next_piece;
     State *current_state;
     State *next_state;
     State *states;

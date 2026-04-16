@@ -18,6 +18,9 @@ void gameplay_event(GameState *gamestate, SDL_Event *event){
             case SDL_SCANCODE_S:
                 rot(gamestate, ROT_DIR_COUNTERCLOCKWISE);
                 break;
+            case SDL_SCANCODE_C:
+                hold_tetromino(&gamestate->player);
+                break;
             case SDL_SCANCODE_P:
                 setNextState(gamestate, &gamestate->states[STATE_PAUSE]);
                 break;
