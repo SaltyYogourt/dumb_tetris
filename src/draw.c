@@ -3,6 +3,7 @@
 #include "game.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_stdinc.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 enum {  CORNER_DISPLAY_BOTTOM = 0b01,
         CORNER_DISPLAY_RIGHT  = 0b10,
@@ -52,11 +53,11 @@ void draw_game(GameState *gamestate){
     draw_player_shadow(&gamestate->player, gamestate->board, gamestate->renderer);
 
     //Next display
-    calculate_corner_display(&next_tetromino_corner_display, CORNER_DISPLAY_TOP_RIGHT, "");
+    calculate_corner_display(&next_tetromino_corner_display, CORNER_DISPLAY_TOP_RIGHT, "NEXT");
     draw_corner_display(gamestate->renderer, &next_tetromino_corner_display);
     draw_tetromino_in_corner_display(gamestate->renderer, &next_tetromino_corner_display, &gamestate->piece_data[gamestate->next_tetromino_id]);
 
-    calculate_corner_display(&held_tetromino_corner_display, CORNER_DISPLAY_TOP_LEFT, "");
+    calculate_corner_display(&held_tetromino_corner_display, CORNER_DISPLAY_TOP_LEFT, "HELD");
     draw_corner_display(gamestate->renderer, &held_tetromino_corner_display);
     if(gamestate->player.held_tetromino_id != 255){
         draw_tetromino_in_corner_display(gamestate->renderer, &held_tetromino_corner_display, &gamestate->piece_data[gamestate->player.held_tetromino_id]);
