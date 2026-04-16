@@ -44,8 +44,8 @@ typedef struct {
     char x;
     char y;
     unsigned char tetromino_id;
+    unsigned char held_tetromino_id;
     char rot;
-    PieceData *held_piece;
     PieceData *tetromino;
 } Player;
 
@@ -53,8 +53,10 @@ typedef struct {
 typedef struct GameState {
     float gravity;
     float gravity_step;
+    char held_once;
     short level;
     int lock_time;
+    int next_tetromino_id;
     Uint64 last_tick;
     Uint64 pause_tick;
     Uint64 deltatime;
@@ -63,7 +65,6 @@ typedef struct GameState {
     SDL_Window *window;
     SDL_Renderer *renderer;
     Player player;
-    PieceData *next_piece;
     State *current_state;
     State *next_state;
     State *states;

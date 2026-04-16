@@ -11,7 +11,8 @@ typedef struct LevelData{
 } LevelData;
 
 LevelData *get_level_up_data(short level);
-void hold_tetromino(Player *player);
+void hold_tetromino(GameState *gamestate);
+int get_next(GameState *gamestate);
 void commit_level_up(GameState *gamestate, LevelData *lup_data);
 void update_game(GameState *gamestate);
 void game_loop(GameState *gamestate);

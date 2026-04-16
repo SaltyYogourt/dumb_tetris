@@ -76,11 +76,27 @@ void init_lup_data(){
     };
 }
 
-void hold_tetromino(Player *player){
-    if(!player->held_piece){
-        player->held_piece = player->tetromino;
-        //spawn new
+void hold_tetromino(GameState *gamestate){
+    Player *player = &gamestate->player;
+    if(gamestate->held_once){
+        return;
     }
+    if(player->held_tetromino_id == 255){ //PLACEHOLDER FOR "EMPTY"
+        player->held_tetromino_id = player->tetromino_id;
+        new_tetromino(gamestate, get_next(gamestate), STARTING_Y);
+    }
+    else {
+        player->tetromino_id ^= player->held_tetromino_id; 
+        player->held_tetromino_id ^= player->tetromino_id;
+        new_tetromino(gamestate, player->tetromino_id ^= player->held_tetromino_id, STARTING_Y);
+    }
+    gamestate->held_once = 1;
+}
+
+int get_next(GameState *gamestate){
+    int id = gamestate->next_tetromino_id;
+    gamestate->next_tetromino_id = get_random_tetromino(gamestate->piece_history_idx);
+    return id;
 }
 
 LevelData *get_level_up_data(short level){
@@ -159,7 +175,7 @@ unsigned char get_random_tetromino(unsigned char history[4]){
 }
 
 void enter_exit_placeholder(GameState *gamestate){
-
+    return;
 }
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -204,6 +220,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     init_tetrominos(gamestate->piece_data);
 
     new_tetromino(gamestate, tetromino_id, STARTING_Y);
+    player->held_tetromino_id = 255;
 
     //random seed: time
     Sint64 time;
@@ -372,7 +389,7 @@ void update_game(GameState *gamestate)
                 }
             }
             //TODO: use lines for score
-            unsigned char new_tetromino_idx = get_random_tetromino(gamestate->piece_history_idx);
+            unsigned char new_tetromino_idx = get_next(gamestate);
             new_tetromino(gamestate, new_tetromino_idx, STARTING_Y);
             if(check_collisiong2(gamestate) & T_BOUND_OVERLAP) { 
                 SDL_Log("oops");
@@ -380,6 +397,7 @@ void update_game(GameState *gamestate)
             push_history(new_tetromino_idx, gamestate->piece_history_idx);
             reset_delay(gamestate);
             gamestate->gravity_step = 0;
+            gamestate->held_once = 0;
         }
     }
 }
