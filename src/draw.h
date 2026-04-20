@@ -4,8 +4,18 @@
 #include "tetromino.h"
 #include "game.h"
 
+typedef struct CornerDisplay {
+    int x, y;
+    int w, h;
+    int title_h;
+    char *title_text;
+} CornerDisplay;
+
 void draw_game(GameState *gamestate);
-void draw_corner_display(SDL_Renderer *renderer, char *title, int pos);
+void get_corner_display_center(CornerDisplay *display, int *x, int *y);
+void calculate_corner_display(CornerDisplay *display, int pos, char *title);
+void draw_corner_display(SDL_Renderer *renderer, CornerDisplay *display);
+void draw_tetromino_in_corner_display(SDL_Renderer *renderer, CornerDisplay *display, PieceData *tetromino);
 void draw_pause(GameState *gamestate);
 void draw_board(unsigned char (*board)[10], SDL_Renderer *renderer);
 void draw_player(Player *player, SDL_Renderer *renderer);

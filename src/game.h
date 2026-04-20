@@ -2,6 +2,7 @@
 #define GAME_H_INCLUDED
 
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #define MOVE_SPEED 16
 #define BOARD_WIDTH 10
@@ -68,6 +69,7 @@ typedef struct GameState {
     State *current_state;
     State *next_state;
     State *states;
+    TTF_Font *font;
     unsigned char board[BOARD_HEIGHT][BOARD_WIDTH];
 } GameState;
 

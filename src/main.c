@@ -2,6 +2,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL_stdinc.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include "main.h"
 #include "tetromino.h"
@@ -201,6 +202,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     SDL_SetRenderVSync(gamestate->renderer, 1);
     SDL_SetRenderDrawBlendMode(gamestate->renderer, SDL_BLENDMODE_BLEND);
     
+    gamestate->font = TTF_OpenFont("", 12); 
+
     gamestate->last_tick = SDL_GetTicks();
     gamestate->gravity = 1.0f/64.0f;
     gamestate->gravity_step = 0.0f;
@@ -245,6 +248,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     //we're going pointer chasing baby
     gamestate->next_state = NULL;
     gamestate->current_state = &gamestate->states[STATE_GAMEPLAY];
+
+    gamestate->next_tetromino_id = get_random_tetromino(gamestate->piece_history_idx);
 
     init_lup_data();
     LevelData *lup_data = NULL;
