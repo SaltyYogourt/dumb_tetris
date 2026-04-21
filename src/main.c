@@ -296,9 +296,7 @@ void movx(GameState *gamestate, int dir){
 void rot(GameState *gamestate, int dir){
     Player *player = &gamestate->player;
     int new_rot = player->rot+dir;
-   
-    if (new_rot > 3) new_rot = 0;
-    else if (new_rot < 0) new_rot = 3; 
+    new_rot %= 4; 
 
     switch (check_rotation(gamestate, new_rot)) {
             case ROT_INPLACE:
