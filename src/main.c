@@ -257,6 +257,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         commit_level_up(gamestate, lup_data);
     }
 
+    draw_init(gamestate);
+
     return SDL_APP_CONTINUE;  
 }
 
