@@ -11,6 +11,7 @@ typedef struct CornerDisplay {
     char *title_text;
 } CornerDisplay;
 
+void draw_init(GameState *gamestate);
 void draw_game(GameState *gamestate);
 void get_corner_display_center(CornerDisplay *display, int *x, int *y);
 void calculate_corner_display(CornerDisplay *display, int pos, char *title);

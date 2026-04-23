@@ -4,6 +4,9 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3_ttf/SDL_ttf.h>
+#include <pwd.h>
+#include <unistd.h>
+#include <string.h>
 
 enum {  CORNER_DISPLAY_BOTTOM = 0b01,
         CORNER_DISPLAY_RIGHT  = 0b10,
@@ -37,6 +40,29 @@ int start_pos = (WINDOW_WIDTH/2)-(BOARD_WIDTH/2)*CELL_SIZE;
 static CornerDisplay next_tetromino_corner_display;
 static CornerDisplay held_tetromino_corner_display;
 
+static SDL_Texture *test_texture = NULL;
+
+void draw_init(GameState *gamestate){
+    TTF_Init();
+    calculate_corner_display(&next_tetromino_corner_display, CORNER_DISPLAY_TOP_RIGHT, "NEXT");
+    calculate_corner_display(&held_tetromino_corner_display, CORNER_DISPLAY_TOP_LEFT, "HELD");
+
+
+    //FIXME: we have to make OS specific abstractions to get fonts. fuck me.
+    struct passwd *pw = getpwuid(getuid());
+    char *font_path = pw->pw_dir;
+    char *font_name = "/.fonts/RubikMonoOne-Regular.ttf";
+    strncat(font_path, font_name, strlen(font_name));
+
+    gamestate->font = TTF_OpenFont(font_path, 18.0f);
+    SDL_Log("%s\n", SDL_GetError());
+    SDL_Color clr = { .r = 255, .g = 0, .b = 255, .a = 255 };
+    SDL_Surface *text;
+    text = TTF_RenderText_Blended(gamestate->font, "Hello World!", 0, clr);
+    test_texture = SDL_CreateTextureFromSurface(gamestate->renderer, text);
+    //font shit here
+}
+
 void debug_gravity(GameState *gamestate){
     char debug_text[64];
     SDL_snprintf(debug_text, 64, "%f, x: %d, y: %d, idx: %d\nlevel: %d", gamestate->gravity, gamestate->player.x, gamestate->player.y, gamestate->player.tetromino_id, gamestate->level);
@@ -47,22 +73,34 @@ void debug_gravity(GameState *gamestate){
 void draw_game(GameState *gamestate){
     SDL_SetRenderDrawColor(gamestate->renderer, 16, 16, 16, SDL_ALPHA_OPAQUE);  
     SDL_RenderClear(gamestate->renderer);
-    //SDL_Log("screen width: %d; board width: %d", WINDOW_WIDTH, BOARD_WIDTH*CELL_SIZE);
+
+    int w = 0, h = 0;
+    SDL_FRect dst;
+    const float scale = 1.0f;
+
+    /* Center the text and scale it up */
+    SDL_GetRenderOutputSize(gamestate->renderer, &w, &h);
+    SDL_SetRenderScale(gamestate->renderer, scale, scale);
+    SDL_GetTextureSize(test_texture, &dst.w, &dst.h);
+    dst.x = ((w / scale) - dst.w) / 2;
+    dst.y = ((h / scale) - dst.h) / 2;
+    
+    SDL_RenderTexture(gamestate->renderer, test_texture, NULL, &dst);
+
     draw_board(gamestate->board, gamestate->renderer);
     draw_player(&gamestate->player, gamestate->renderer);
     draw_player_shadow(&gamestate->player, gamestate->board, gamestate->renderer);
 
     //Next display
-    calculate_corner_display(&next_tetromino_corner_display, CORNER_DISPLAY_TOP_RIGHT, "NEXT");
     draw_corner_display(gamestate->renderer, &next_tetromino_corner_display);
     draw_tetromino_in_corner_display(gamestate->renderer, &next_tetromino_corner_display, &gamestate->piece_data[gamestate->next_tetromino_id]);
 
-    calculate_corner_display(&held_tetromino_corner_display, CORNER_DISPLAY_TOP_LEFT, "HELD");
     draw_corner_display(gamestate->renderer, &held_tetromino_corner_display);
     if(gamestate->player.held_tetromino_id != 255){
         draw_tetromino_in_corner_display(gamestate->renderer, &held_tetromino_corner_display, &gamestate->piece_data[gamestate->player.held_tetromino_id]);
     }
     debug_gravity(gamestate);
+    
     SDL_RenderPresent(gamestate->renderer);
 }
 

@@ -297,7 +297,7 @@ void movx(GameState *gamestate, int dir){
 
 void rot(GameState *gamestate, int dir){
     Player *player = &gamestate->player;
-    int new_rot = player->rot+dir;
+    unsigned int new_rot = player->rot+dir;
     new_rot %= 4; 
 
     switch (check_rotation(gamestate, new_rot)) {
