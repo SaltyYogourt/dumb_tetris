@@ -11,10 +11,11 @@ typedef struct CornerDisplay {
     char *title_text;
 } CornerDisplay;
 
+void draw_init(GameState *gamestate);
 void draw_game(GameState *gamestate);
 void get_corner_display_center(CornerDisplay *display, int *x, int *y);
-void calculate_corner_display(CornerDisplay *display, int pos, char *title);
-void draw_corner_display(SDL_Renderer *renderer, CornerDisplay *display);
+void calculate_corner_display(CornerDisplay *display, int pos);
+void draw_corner_display(SDL_Renderer *renderer, CornerDisplay *display, TTF_Font *font, char *title);
 void draw_tetromino_in_corner_display(SDL_Renderer *renderer, CornerDisplay *display, PieceData *tetromino);
 void draw_pause(GameState *gamestate);
 void draw_board(unsigned char (*board)[10], SDL_Renderer *renderer);
