@@ -5,9 +5,6 @@
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3_ttf/SDL_ttf.h>
-#include <pwd.h>
-#include <unistd.h>
-#include <string.h>
 
 enum {  CORNER_DISPLAY_BOTTOM = 0b01,
         CORNER_DISPLAY_RIGHT  = 0b10,
