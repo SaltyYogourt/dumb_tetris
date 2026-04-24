@@ -42,7 +42,7 @@ static CornerDisplay next_tetromino_corner_display;
 static CornerDisplay held_tetromino_corner_display;
 
 //static 
-static SDL_Color font_color = { .r = 32, .g = 32, .b = 32, .a = 255 };
+static SDL_Color font_color = { .r = 224, .g = 224, .b = 224, .a = 255 };
 
 void draw_init(GameState *gamestate){
     TTF_Init();
