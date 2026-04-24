@@ -77,7 +77,9 @@ void draw_game(GameState *gamestate){
     if(gamestate->player.held_tetromino_id != 255){
         draw_tetromino_in_corner_display(gamestate->renderer, &held_tetromino_corner_display, &gamestate->piece_data[gamestate->player.held_tetromino_id]);
     }
-    debug_gravity(gamestate);
+    #ifdef DEBUG
+        debug_gravity(gamestate);
+    #endif
     
     SDL_RenderPresent(gamestate->renderer);
 }

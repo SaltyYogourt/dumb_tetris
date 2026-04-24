@@ -10,8 +10,8 @@ DEPS			= $(OBJS:.o=.d)
 
 CFLAGS 			:= -Wall -Wextra
 OPTIMIZE_FLAGS 		:= -O3
-DEBUG_FLAGS 		= -g
-DEBUG3_FLAGS 		= -ggdb3 -fno-stack-protector
+DEBUG_FLAGS 		= -DDEBUG -g
+DEBUG3_FLAGS 		= $(DEBUG_FLAGS)gdb3 -fno-stack-protector
 LINKER_FLAGS 		= $(shell pkg-config --libs sdl3 sdl3-ttf)
 OBJ_NAME 		= main
 
