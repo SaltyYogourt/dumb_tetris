@@ -2,6 +2,7 @@
 #include "tetromino.h"
 #include "game.h"
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_error.h>
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <pwd.h>
@@ -40,26 +41,20 @@ int start_pos = (WINDOW_WIDTH/2)-(BOARD_WIDTH/2)*CELL_SIZE;
 static CornerDisplay next_tetromino_corner_display;
 static CornerDisplay held_tetromino_corner_display;
 
-static SDL_Texture *test_texture = NULL;
+//static 
+static SDL_Color font_color = { .r = 32, .g = 32, .b = 32, .a = 255 };
 
 void draw_init(GameState *gamestate){
     TTF_Init();
-    calculate_corner_display(&next_tetromino_corner_display, CORNER_DISPLAY_TOP_RIGHT, "NEXT");
-    calculate_corner_display(&held_tetromino_corner_display, CORNER_DISPLAY_TOP_LEFT, "HELD");
+    calculate_corner_display(&next_tetromino_corner_display, CORNER_DISPLAY_TOP_RIGHT);
+    calculate_corner_display(&held_tetromino_corner_display, CORNER_DISPLAY_TOP_LEFT);
 
 
-    //FIXME: we have to make OS specific abstractions to get fonts. fuck me.
-    struct passwd *pw = getpwuid(getuid());
-    char *font_path = pw->pw_dir;
-    char *font_name = "/.fonts/RubikMonoOne-Regular.ttf";
-    strncat(font_path, font_name, strlen(font_name));
+    //TODO: think of clean way to pull this from a cdn/remote repository?
+    char *font_path = "resources/fonts/PressStart2P-Regular.ttf";
 
     gamestate->font = TTF_OpenFont(font_path, 18.0f);
     SDL_Log("%s\n", SDL_GetError());
-    SDL_Color clr = { .r = 255, .g = 0, .b = 255, .a = 255 };
-    SDL_Surface *text;
-    text = TTF_RenderText_Blended(gamestate->font, "Hello World!", 0, clr);
-    test_texture = SDL_CreateTextureFromSurface(gamestate->renderer, text);
     //font shit here
 }
 
@@ -73,29 +68,15 @@ void debug_gravity(GameState *gamestate){
 void draw_game(GameState *gamestate){
     SDL_SetRenderDrawColor(gamestate->renderer, 16, 16, 16, SDL_ALPHA_OPAQUE);  
     SDL_RenderClear(gamestate->renderer);
-
-    int w = 0, h = 0;
-    SDL_FRect dst;
-    const float scale = 1.0f;
-
-    /* Center the text and scale it up */
-    SDL_GetRenderOutputSize(gamestate->renderer, &w, &h);
-    SDL_SetRenderScale(gamestate->renderer, scale, scale);
-    SDL_GetTextureSize(test_texture, &dst.w, &dst.h);
-    dst.x = ((w / scale) - dst.w) / 2;
-    dst.y = ((h / scale) - dst.h) / 2;
-    
-    SDL_RenderTexture(gamestate->renderer, test_texture, NULL, &dst);
-
     draw_board(gamestate->board, gamestate->renderer);
     draw_player(&gamestate->player, gamestate->renderer);
     draw_player_shadow(&gamestate->player, gamestate->board, gamestate->renderer);
 
     //Next display
-    draw_corner_display(gamestate->renderer, &next_tetromino_corner_display);
+    draw_corner_display(gamestate->renderer, &next_tetromino_corner_display, gamestate->font, "Next");
     draw_tetromino_in_corner_display(gamestate->renderer, &next_tetromino_corner_display, &gamestate->piece_data[gamestate->next_tetromino_id]);
 
-    draw_corner_display(gamestate->renderer, &held_tetromino_corner_display);
+    draw_corner_display(gamestate->renderer, &held_tetromino_corner_display, gamestate->font, "Held");
     if(gamestate->player.held_tetromino_id != 255){
         draw_tetromino_in_corner_display(gamestate->renderer, &held_tetromino_corner_display, &gamestate->piece_data[gamestate->player.held_tetromino_id]);
     }
@@ -159,7 +140,7 @@ void get_corner_display_center(CornerDisplay *display, int *x, int *y){
         *y = (display->y+display->title_h)+((display->h-display->title_h)/2);
 }
 
-void calculate_corner_display(CornerDisplay *display, int pos, char *title){
+void calculate_corner_display(CornerDisplay *display, int pos){
     display->w = corner_display_w;
     display->h = corner_display_h;
     display->x = SDL_abs(((WINDOW_WIDTH-corner_display_w)*(bool)(pos & CORNER_DISPLAY_RIGHT)) - corner_display_w_padding);
@@ -167,7 +148,7 @@ void calculate_corner_display(CornerDisplay *display, int pos, char *title){
     display->title_h = corner_display_title_height;
 }
 
-void draw_corner_display(SDL_Renderer *renderer, CornerDisplay *display){
+void draw_corner_display(SDL_Renderer *renderer, CornerDisplay *display, TTF_Font *font, char *title){
     rect.w = display->w;
     rect.h = display->h;
 
@@ -181,6 +162,23 @@ void draw_corner_display(SDL_Renderer *renderer, CornerDisplay *display){
     SDL_SetRenderDrawColor(renderer, 16, 96, 16, SDL_ALPHA_OPAQUE);  
     rect.h = display->title_h;
     SDL_RenderFillRect(renderer, &rect);
+
+    SDL_FRect dst;
+    const float scale = 1.0f;
+
+    SDL_Texture *font_texture = NULL;
+    SDL_Surface *text;
+    text = TTF_RenderText_Blended(font, title, 0, font_color);
+    font_texture = SDL_CreateTextureFromSurface(renderer, text);
+    
+    /* Center the text and scale it up */
+    SDL_SetRenderScale(renderer, scale, scale);
+    SDL_GetTextureSize(font_texture, &dst.w, &dst.h);
+    dst.x = display->x + (((display->w / scale) - dst.w) / 2);
+    dst.y = display->y + (((display->title_h / scale) - dst.h) / 2);
+
+    SDL_RenderTexture(renderer, font_texture, NULL, &dst);
+
 }
 
 
