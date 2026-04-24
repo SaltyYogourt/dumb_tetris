@@ -40,6 +40,7 @@ static CornerDisplay held_tetromino_corner_display;
 
 //static 
 static SDL_Color font_color = { .r = 224, .g = 224, .b = 224, .a = 255 };
+static SDL_Color tetromino_color_table[7]; //seven beers are all I need...
 
 void draw_init(GameState *gamestate){
     TTF_Init();
@@ -53,6 +54,13 @@ void draw_init(GameState *gamestate){
     gamestate->font = TTF_OpenFont(font_path, 18.0f);
     SDL_Log("%s\n", SDL_GetError());
     //font shit here
+
+    //init color table
+    for(int x = 0; 7 > x; ++x){
+        SDL_Color *dst_color = &tetromino_color_table[x];
+        SDL_Color *src_color = &gamestate->piece_data[x].color;
+        SDL_memcpy(dst_color, src_color, sizeof(SDL_Color));
+    }
 }
 
 void debug_gravity(GameState *gamestate){
@@ -192,8 +200,10 @@ void draw_board(unsigned char (*board)[10], SDL_Renderer *renderer)
             if(board[i][j] == T_EMPTY) continue;
             rect.x = start_pos+(j*CELL_SIZE);
             rect.y = i*CELL_SIZE;
-            if(board[i][j] == T_PLAYER) SDL_SetRenderDrawColor(renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
-            else if(board[i][j] == T_BLOCK) SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+            //if(board[i][j] == T_PLAYER) SDL_SetRenderDrawColor(renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
+            //else if(board[i][j] == T_BLOCK) SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+            SDL_Color piece_color = tetromino_color_table[board[i][j]-1];
+            SDL_SetRenderDrawColor(renderer, piece_color.r, piece_color.g, piece_color.b, SDL_ALPHA_OPAQUE);
             SDL_RenderFillRect(renderer,&rect);
         }
     }

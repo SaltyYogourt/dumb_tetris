@@ -140,7 +140,7 @@ void lock_piece(GameState *gamestate) {
    get_abs_offsetsp(&gamestate->player, gamestate->player.rot, abs_points);
 
    for(int i = 0; 4 > i; ++i){
-        gamestate->board[abs_points[i].y][abs_points[i].x] = 1;
+        gamestate->board[abs_points[i].y][abs_points[i].x] = gamestate->player.tetromino_id+1;
    }
 }
 

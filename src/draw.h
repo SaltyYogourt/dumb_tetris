@@ -13,6 +13,7 @@ typedef struct CornerDisplay {
 
 void draw_init(GameState *gamestate);
 void draw_game(GameState *gamestate);
+void init_color_table(PieceData *t);
 void get_corner_display_center(CornerDisplay *display, int *x, int *y);
 void calculate_corner_display(CornerDisplay *display, int pos);
 void draw_corner_display(SDL_Renderer *renderer, CornerDisplay *display, TTF_Font *font, char *title);
