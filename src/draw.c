@@ -70,7 +70,7 @@ void debug_gravity(GameState *gamestate){
     SDL_RenderDebugText(gamestate->renderer, 0, 24, debug_text);
 }
 
-void draw_game(GameState *gamestate){
+void _draw_game_screen(GameState *gamestate){
     SDL_SetRenderDrawColor(gamestate->renderer, 16, 16, 16, SDL_ALPHA_OPAQUE);  
     SDL_RenderClear(gamestate->renderer);
     draw_board(gamestate->board, gamestate->renderer);
@@ -89,10 +89,15 @@ void draw_game(GameState *gamestate){
         debug_gravity(gamestate);
     #endif
     
+}
+
+void draw_game(GameState *gamestate){
+    _draw_game_screen(gamestate);
     SDL_RenderPresent(gamestate->renderer);
 }
 
 void draw_pause(GameState *gamestate){
+    _draw_game_screen(gamestate);
     SDL_SetRenderDrawColor(gamestate->renderer, 64,192,192,128);
     SDL_FRect some_rect = {
         .x = (WINDOW_WIDTH/2.0f)-110,
