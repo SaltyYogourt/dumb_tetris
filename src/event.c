@@ -27,7 +27,10 @@ void gameplay_event(GameState *gamestate, SDL_Event *event){
             case SDL_SCANCODE_SPACE:
                 hard_drop(gamestate, false);
                 break;
-        #ifdef DEBUG
+            case SDL_SCANCODE_LSHIFT:
+                soft_drop(gamestate, false);
+                break;
+#ifdef DEBUG
             case SDL_SCANCODE_Q:
                 gamestate->gravity+=8/64.0f;
                 break;
@@ -38,7 +41,16 @@ void gameplay_event(GameState *gamestate, SDL_Event *event){
                 gamestate->player.y = 3;
                 gamestate->gravity_step = 0.0f;
                 break;
-        #endif
+#endif
+            default:
+                break;
+        }
+    }
+    else if(event->type == SDL_EVENT_KEY_UP){
+        switch (event->key.scancode) {
+            case SDL_SCANCODE_LSHIFT:
+                soft_drop_release(gamestate);
+                break;
             default:
                 break;
         }

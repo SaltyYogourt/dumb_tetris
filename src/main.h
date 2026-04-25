@@ -25,6 +25,8 @@ void collapse_line(GameState *gamestate, int line);
 void reset_delay(GameState *gamestate);
 void lock_piece(GameState *gamestate);
 void hard_drop(GameState *gamestate, bool sonicdrop);
+void soft_drop(GameState *gamestate, bool locking);
+void soft_drop_release(GameState *gamestate);
 void new_tetromino(GameState *gamestate, int id, int height);
 void game_pause(GameState *gamestate);
 void pause_loop(GameState *gamestate);
