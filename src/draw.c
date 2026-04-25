@@ -200,8 +200,6 @@ void draw_board(unsigned char (*board)[10], SDL_Renderer *renderer)
             if(board[i][j] == T_EMPTY) continue;
             rect.x = start_pos+(j*CELL_SIZE);
             rect.y = i*CELL_SIZE;
-            //if(board[i][j] == T_PLAYER) SDL_SetRenderDrawColor(renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
-            //else if(board[i][j] == T_BLOCK) SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
             SDL_Color piece_color = tetromino_color_table[board[i][j]-1];
             SDL_SetRenderDrawColor(renderer, piece_color.r, piece_color.g, piece_color.b, SDL_ALPHA_OPAQUE);
             SDL_RenderFillRect(renderer,&rect);
