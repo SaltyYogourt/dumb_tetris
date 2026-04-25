@@ -15,6 +15,7 @@
 
 static LevelData lup_list[LUP_LIST_COUNT];
 static short lup_point = 0;
+static float gravity_old = 0;
 
 //replace this by serializing data from a config or something?
 void init_lup_data(){
@@ -122,6 +123,17 @@ void commit_level_up(GameState *gamestate, LevelData *lup_data){
     //TODO: if we have other stuff to adjust, do it here.
     //FIXME: have handling for any NULL/0 values. we have an issue where if we want to only update certain values per level
     //rather than everything, we will try to update them all.
+}
+
+void soft_drop(GameState *gamestate, bool locking){
+    gravity_old = gamestate->gravity;
+    gamestate->gravity = 1.0f/2.0f;
+    if(locking && (check_collisiong2(gamestate) & T_BOUND_BELOW))
+        gamestate->lock_time = 0;
+}
+
+void soft_drop_release(GameState *gamestate){
+    gamestate->gravity = gravity_old;
 }
 
 void hard_drop(GameState *gamestate, bool sonicdrop){
