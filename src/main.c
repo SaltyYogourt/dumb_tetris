@@ -97,6 +97,7 @@ void hold_tetromino(GameState *gamestate){
 int get_next(GameState *gamestate){
     int id = gamestate->next_tetromino_id;
     gamestate->next_tetromino_id = get_random_tetromino(gamestate->piece_history_idx);
+    push_history(gamestate->next_tetromino_id, gamestate->piece_history_idx);
     return id;
 }
 
@@ -399,7 +400,6 @@ void update_game(GameState *gamestate)
             if(check_collisiong2(gamestate) & T_BOUND_OVERLAP) { 
                 SDL_Log("oops");
             }
-            push_history(new_tetromino_idx, gamestate->piece_history_idx);
             reset_delay(gamestate);
             gamestate->gravity_step = 0;
             gamestate->held_once = 0;
