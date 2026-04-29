@@ -44,3 +44,5 @@ main
 *.su
 *.idb
 *.pdb
+
+build/*
