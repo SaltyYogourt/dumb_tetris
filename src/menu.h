@@ -20,4 +20,7 @@ void up(Menu *self);
 void down(Menu *self);
 Menu create_menu(MenuElement items[], int item_len);
 
+Menu *get_pause_menu();
+Menu *get_game_menu();
+
 #endif

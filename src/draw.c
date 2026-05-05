@@ -1,6 +1,7 @@
 #include "draw.h"
 #include "tetromino.h"
 #include "game.h"
+#include "menu.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_stdinc.h>
@@ -70,6 +71,24 @@ void debug_gravity(GameState *gamestate){
     SDL_RenderDebugText(gamestate->renderer, 0, 24, debug_text);
 }
 
+void _draw_text_centered(int x, int y, int w, int h, char* content, SDL_Renderer *renderer, TTF_Font *font){
+    SDL_FRect dst;
+    const float scale = 1.0f;
+
+    SDL_Texture *font_texture = NULL;
+    SDL_Surface *text;
+    text = TTF_RenderText_Blended(font, content, 0, font_color);
+    font_texture = SDL_CreateTextureFromSurface(renderer, text);
+    
+    /* Center the text and scale it up */
+    SDL_SetRenderScale(renderer, scale, scale);
+    SDL_GetTextureSize(font_texture, &dst.w, &dst.h);
+    dst.x = x + (((w / scale) - dst.w) / 2);
+    dst.y = y + (((h / scale) - dst.h) / 2);
+
+    SDL_RenderTexture(renderer, font_texture, NULL, &dst);
+}
+
 void _draw_game_screen(GameState *gamestate){
     SDL_SetRenderDrawColor(gamestate->renderer, 16, 16, 16, SDL_ALPHA_OPAQUE);  
     SDL_RenderClear(gamestate->renderer);
@@ -105,6 +124,11 @@ void draw_pause(GameState *gamestate){
         .w = 220,
         .h = 460,
     };
+    int height = TTF_GetFontHeight(gamestate->font)+6;
+    Menu *pause = get_pause_menu();
+    for(int i = 0; pause->item_count > i; ++i){
+            
+    }
 
     SDL_RenderFillRect(gamestate->renderer,&some_rect);
     SDL_RenderPresent(gamestate->renderer);
@@ -175,22 +199,7 @@ void draw_corner_display(SDL_Renderer *renderer, CornerDisplay *display, TTF_Fon
     rect.h = display->title_h;
     SDL_RenderFillRect(renderer, &rect);
 
-    SDL_FRect dst;
-    const float scale = 1.0f;
-
-    SDL_Texture *font_texture = NULL;
-    SDL_Surface *text;
-    text = TTF_RenderText_Blended(font, title, 0, font_color);
-    font_texture = SDL_CreateTextureFromSurface(renderer, text);
-    
-    /* Center the text and scale it up */
-    SDL_SetRenderScale(renderer, scale, scale);
-    SDL_GetTextureSize(font_texture, &dst.w, &dst.h);
-    dst.x = display->x + (((display->w / scale) - dst.w) / 2);
-    dst.y = display->y + (((display->title_h / scale) - dst.h) / 2);
-
-    SDL_RenderTexture(renderer, font_texture, NULL, &dst);
-
+    _draw_text_centered(display->x, display->y, display->w, display->title_h, title, renderer, font);
 }
 
 
