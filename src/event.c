@@ -1,6 +1,7 @@
 #include "event.h"
 #include "game.h"
 #include "main.h"
+#include "menu.h"
 #include "state.h"
 
 void gameplay_event(GameState *gamestate, SDL_Event *event){
@@ -59,9 +60,19 @@ void gameplay_event(GameState *gamestate, SDL_Event *event){
 
 void pause_event(GameState *gamestate, SDL_Event *event){
     if (event->type == SDL_EVENT_KEY_DOWN){
+        Menu *pause_menu = get_pause_menu();
         switch (event->key.scancode){
             case SDL_SCANCODE_P:
                 setNextState(gamestate, &gamestate->states[STATE_GAMEPLAY]);
+                break;
+            case SDL_SCANCODE_UP:
+                pause_menu->up(pause_menu);
+                break;
+            case SDL_SCANCODE_DOWN:
+                pause_menu->down(pause_menu);
+                break;
+            case SDL_SCANCODE_RETURN:
+                pause_menu->item[pause_menu->current].click();
                 break;
             default:
                 break;

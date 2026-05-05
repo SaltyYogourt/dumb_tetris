@@ -124,13 +124,23 @@ void draw_pause(GameState *gamestate){
         .w = 220,
         .h = 460,
     };
-    int height = TTF_GetFontHeight(gamestate->font)+6;
-    Menu *pause = get_pause_menu();
-    for(int i = 0; pause->item_count > i; ++i){
-            
-    }
-
     SDL_RenderFillRect(gamestate->renderer,&some_rect);
+    Menu *pause = get_pause_menu();
+    int height = TTF_GetFontHeight(gamestate->font)+6;
+    int offset = (some_rect.h)/(pause->item_count+1);
+
+    float selected_height_pad = 24; 
+    rect.x = some_rect.x+20;
+    rect.y = some_rect.y+(offset*(pause->current+1))-selected_height_pad/2;
+    rect.w = 180;
+    rect.h = height+selected_height_pad;
+    
+    SDL_SetRenderDrawColor(gamestate->renderer, 16,16,16,255);
+    SDL_RenderFillRect(gamestate->renderer,&rect);
+
+    for(int i = 0; pause->item_count > i; ++i){
+        _draw_text_centered(some_rect.x, some_rect.y+(offset*(i+1)), 220, height, pause->item[i].text, gamestate->renderer, gamestate->font);
+    }
     SDL_RenderPresent(gamestate->renderer);
 }
 

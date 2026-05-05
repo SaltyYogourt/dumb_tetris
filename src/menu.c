@@ -1,4 +1,6 @@
 #include "menu.h"
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_init.h>
 
 MenuElement main_menu_items[2] = {
 { .text = "Start" },
@@ -24,13 +26,15 @@ Menu pause_menu = {
     .item = { 
         { .text = "Resume"},
         { .text = "Restart"},
-        { .text = "Exit"},
+        { .text = "Exit",
+          .click = SDL_Quit },
     }
 };
 
 void up(Menu *self){
     self->current--;
-    self->current %= self->item_count;
+    if(self->current > self->item_count-1)
+        self->current = self->item_count-1;
 }
 
 void down(Menu *self){
