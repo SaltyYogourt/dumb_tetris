@@ -28,10 +28,13 @@ void hard_drop(GameState *gamestate, bool sonicdrop);
 void soft_drop(GameState *gamestate, bool locking);
 void soft_drop_release(GameState *gamestate);
 void new_tetromino(GameState *gamestate, int id, int height);
+void init_lup_data();
 void game_pause(GameState *gamestate);
 void pause_loop(GameState *gamestate);
 void pause_enter(GameState *gamestate);
 void pause_exit(GameState *gamestate);
+
+void enter_exit_placeholder(GameState *gamestate);
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]);
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event);

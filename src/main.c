@@ -17,6 +17,58 @@ static LevelData lup_list[LUP_LIST_COUNT];
 static short lup_point = 0;
 static float gravity_old = 0;
 
+void game_start(GameState *gamestate){
+    init_tetrominos(gamestate->piece_data);
+
+    //random seed: time
+    Sint64 time;
+    SDL_GetCurrentTime(&time); 
+    SDL_srand(time);
+
+    //State init
+    gamestate->states = (State*)SDL_malloc(sizeof(State)*STATES_COUNT);
+
+    gamestate->states[STATE_GAMEPLAY].update = game_loop;
+    gamestate->states[STATE_GAMEPLAY].render = draw_game;
+    gamestate->states[STATE_GAMEPLAY].input = gameplay_event;
+    gamestate->states[STATE_GAMEPLAY].enter = enter_exit_placeholder;
+    gamestate->states[STATE_GAMEPLAY].exit = enter_exit_placeholder;
+
+    gamestate->states[STATE_PAUSE].update = pause_loop; 
+    gamestate->states[STATE_PAUSE].render = draw_pause;
+    gamestate->states[STATE_PAUSE].input = pause_event;
+    gamestate->states[STATE_PAUSE].enter = pause_enter;
+    gamestate->states[STATE_PAUSE].exit = pause_exit;
+}
+
+void game_init(GameState *gamestate){
+    gamestate->last_tick = SDL_GetTicks();
+    gamestate->gravity = 1.0f/64.0f;
+    gamestate->gravity_step = 0.0f;
+    gamestate->lock_time = LOCK_DELAY;
+
+    //initialize history to Z pieces. there's a reason why we do this, im sure
+    SDL_memset(gamestate->piece_history_idx, T_Z, 4);
+    Player *player = &gamestate->player;
+
+    SDL_memset(gamestate->board, T_EMPTY, sizeof(gamestate->board[0][0])*BOARD_HEIGHT*BOARD_WIDTH);
+
+    gamestate->next_tetromino_id = get_random_tetromino(gamestate->piece_history_idx);
+    new_tetromino(gamestate, get_next(gamestate), STARTING_Y);
+    player->held_tetromino_id = 255;
+
+    //we're going pointer chasing baby
+    gamestate->next_state = NULL;
+    gamestate->current_state = &gamestate->states[STATE_GAMEPLAY];
+
+
+    init_lup_data();
+    LevelData *lup_data = NULL;
+    if((lup_data = get_level_up_data(gamestate->level))){
+        commit_level_up(gamestate, lup_data);
+    }
+}
+
 //replace this by serializing data from a config or something?
 void init_lup_data(){
     //https://tetris.wiki/Tetris_The_Grand_Master_3_Terror-Instinct#Speed_timings_2
@@ -217,59 +269,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     
     gamestate->font = TTF_OpenFont("", 12); 
 
-    gamestate->last_tick = SDL_GetTicks();
-    gamestate->gravity = 1.0f/64.0f;
-    gamestate->gravity_step = 0.0f;
-    gamestate->lock_time = LOCK_DELAY;
-
-    //initialize history to Z pieces. there's a reason why we do this, im sure
-    SDL_memset(gamestate->piece_history_idx, T_Z, 4);
-
-    Player *player = &gamestate->player;
-
-    SDL_memset(gamestate->board, T_EMPTY, sizeof(gamestate->board[0][0])*BOARD_HEIGHT*BOARD_WIDTH);
-
-    int tetromino_id = T_J;
-    if(argc > 1) tetromino_id = (char)argv[1][0]-48;
-    SDL_Log("%d\n", tetromino_id);
-
-    init_tetrominos(gamestate->piece_data);
-
-    new_tetromino(gamestate, tetromino_id, STARTING_Y);
-    player->held_tetromino_id = 255;
-
-    //random seed: time
-    Sint64 time;
-    SDL_GetCurrentTime(&time); 
-    SDL_srand(time);
-
-    //State init
-    gamestate->states = (State*)SDL_malloc(sizeof(State)*STATES_COUNT);
-
-    gamestate->states[STATE_GAMEPLAY].update = game_loop;
-    gamestate->states[STATE_GAMEPLAY].render = draw_game;
-    gamestate->states[STATE_GAMEPLAY].input = gameplay_event;
-    gamestate->states[STATE_GAMEPLAY].enter = enter_exit_placeholder;
-    gamestate->states[STATE_GAMEPLAY].exit = enter_exit_placeholder;
-
-    gamestate->states[STATE_PAUSE].update = pause_loop; 
-    gamestate->states[STATE_PAUSE].render = draw_pause;
-    gamestate->states[STATE_PAUSE].input = pause_event;
-    gamestate->states[STATE_PAUSE].enter = pause_enter;
-    gamestate->states[STATE_PAUSE].exit = pause_exit;
-
-    //we're going pointer chasing baby
-    gamestate->next_state = NULL;
-    gamestate->current_state = &gamestate->states[STATE_GAMEPLAY];
-
-    gamestate->next_tetromino_id = get_random_tetromino(gamestate->piece_history_idx);
-
-    init_lup_data();
-    LevelData *lup_data = NULL;
-    if((lup_data = get_level_up_data(gamestate->level))){
-        commit_level_up(gamestate, lup_data);
-    }
-
+    game_start(gamestate);
+    game_init(gamestate);
     draw_init(gamestate);
 
     return SDL_APP_CONTINUE;  
