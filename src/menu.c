@@ -3,8 +3,8 @@
 #include <SDL3/SDL_init.h>
 
 MenuElement main_menu_items[2] = {
-{ .text = "Start" },
-{ .text = "Exit" },
+    { .text = "Start" },
+    { .text = "Exit" },
 };
 
 Menu main_menu = {
@@ -27,7 +27,7 @@ Menu pause_menu = {
         { .text = "Resume"},
         { .text = "Restart"},
         { .text = "Exit",
-          .click = SDL_Quit },
+            .click = SDL_Quit },
     }
 };
 
