@@ -47,6 +47,8 @@ void game_init(GameState *gamestate){
     gamestate->gravity_step = 0.0f;
     gamestate->lock_time = LOCK_DELAY;
 
+    gamestate->level = 0;
+
     //initialize history to Z pieces. there's a reason why we do this, im sure
     SDL_memset(gamestate->piece_history_idx, T_Z, 4);
     Player *player = &gamestate->player;
@@ -440,6 +442,12 @@ void game_pause(GameState *gamestate){
 
 void pause_unpause(GameState *gamestate){
     setNextState(gamestate, &gamestate->states[STATE_GAMEPLAY]);
+}
+
+void pause_restart(GameState *gamestate){
+    game_init(gamestate);
+    pause_unpause(gamestate);
+    SDL_Log("uh.");
 }
 
 void pause_loop(GameState *gamestate){

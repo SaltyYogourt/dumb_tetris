@@ -27,7 +27,8 @@ Menu pause_menu = {
     .item = { 
         { .text = "Resume",
             .click = pause_unpause },
-        { .text = "Restart"},
+        { .text = "Restart",
+            .click = pause_restart },
         { .text = "Exit",
             .click = 0},
     }
