@@ -435,6 +435,11 @@ void game_loop(GameState *gamestate){
 
 void game_pause(GameState *gamestate){
     //handle state change from "game" to "pause".
+    setNextState(gamestate, &gamestate->states[STATE_PAUSE]);
+}
+
+void pause_unpause(GameState *gamestate){
+    setNextState(gamestate, &gamestate->states[STATE_GAMEPLAY]);
 }
 
 void pause_loop(GameState *gamestate){

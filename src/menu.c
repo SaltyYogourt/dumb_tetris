@@ -1,4 +1,5 @@
 #include "menu.h"
+#include "main.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_init.h>
 
@@ -24,10 +25,11 @@ Menu pause_menu = {
     .up = up,
     .down = down,
     .item = { 
-        { .text = "Resume"},
+        { .text = "Resume",
+            .click = pause_unpause },
         { .text = "Restart"},
         { .text = "Exit",
-            .click = SDL_Quit },
+            .click = 0},
     }
 };
 

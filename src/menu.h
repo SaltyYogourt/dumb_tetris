@@ -1,11 +1,12 @@
 #ifndef MENU_H_INCLUDED
 #define MENU_H_INCLUDED
 
+#include "game.h"
 typedef struct Menu Menu;
 
 typedef struct {
     char *text;
-    void (*click)(void);
+    void (*click)(GameState *gamestate);
 } MenuElement;
 
 typedef struct Menu {

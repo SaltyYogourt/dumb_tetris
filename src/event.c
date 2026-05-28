@@ -23,7 +23,7 @@ void gameplay_event(GameState *gamestate, SDL_Event *event){
                 hold_tetromino(gamestate);
                 break;
             case SDL_SCANCODE_P:
-                setNextState(gamestate, &gamestate->states[STATE_PAUSE]);
+                game_pause(gamestate);
                 break;
             case SDL_SCANCODE_SPACE:
                 hard_drop(gamestate, false);
@@ -72,7 +72,7 @@ void pause_event(GameState *gamestate, SDL_Event *event){
                 pause_menu->down(pause_menu);
                 break;
             case SDL_SCANCODE_RETURN:
-                pause_menu->item[pause_menu->current].click();
+                pause_menu->item[pause_menu->current].click(gamestate);
                 break;
             default:
                 break;

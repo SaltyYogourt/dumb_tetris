@@ -30,6 +30,7 @@ void soft_drop_release(GameState *gamestate);
 void new_tetromino(GameState *gamestate, int id, int height);
 void init_lup_data();
 void game_pause(GameState *gamestate);
+void pause_unpause(GameState *gamestate);
 void pause_loop(GameState *gamestate);
 void pause_enter(GameState *gamestate);
 void pause_exit(GameState *gamestate);
