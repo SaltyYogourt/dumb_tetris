@@ -39,6 +39,12 @@ void game_start(GameState *gamestate){
     gamestate->states[STATE_PAUSE].input = pause_event;
     gamestate->states[STATE_PAUSE].enter = pause_enter;
     gamestate->states[STATE_PAUSE].exit = pause_exit;
+
+    gamestate->states[STATE_MENU].update = pause_loop; 
+    gamestate->states[STATE_MENU].render = draw_main_menu;
+    gamestate->states[STATE_MENU].input = pause_event;
+    gamestate->states[STATE_MENU].enter = enter_exit_placeholder;
+    gamestate->states[STATE_MENU].exit = enter_exit_placeholder;
 }
 
 void game_init(GameState *gamestate){
@@ -243,7 +249,7 @@ unsigned char get_random_tetromino(unsigned char history[4]){
 }
 
 void enter_exit_placeholder(GameState *gamestate){
-    return;
+    return; //we dunno the width so just use this placeholder for now...
 }
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -272,7 +278,10 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     gamestate->font = TTF_OpenFont("", 12); 
 
     game_start(gamestate);
-    game_init(gamestate);
+    gamestate->next_state = NULL;
+    gamestate->current_state = &gamestate->states[STATE_MENU];
+
+    //game_init(gamestate);
     draw_init(gamestate);
 
     return SDL_APP_CONTINUE;  
