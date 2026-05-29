@@ -1,6 +1,7 @@
 #include "draw.h"
 #include "tetromino.h"
 #include "game.h"
+#include "menu.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_stdinc.h>
@@ -70,6 +71,24 @@ void debug_gravity(GameState *gamestate){
     SDL_RenderDebugText(gamestate->renderer, 0, 24, debug_text);
 }
 
+void _draw_text_centered(int x, int y, int w, int h, char* content, SDL_Renderer *renderer, TTF_Font *font){
+    SDL_FRect dst;
+    const float scale = 1.0f;
+
+    SDL_Texture *font_texture = NULL;
+    SDL_Surface *text;
+    text = TTF_RenderText_Blended(font, content, 0, font_color);
+    font_texture = SDL_CreateTextureFromSurface(renderer, text);
+    
+    /* Center the text and scale it up */
+    SDL_SetRenderScale(renderer, scale, scale);
+    SDL_GetTextureSize(font_texture, &dst.w, &dst.h);
+    dst.x = x + (((w / scale) - dst.w) / 2);
+    dst.y = y + (((h / scale) - dst.h) / 2);
+
+    SDL_RenderTexture(renderer, font_texture, NULL, &dst);
+}
+
 void _draw_game_screen(GameState *gamestate){
     SDL_SetRenderDrawColor(gamestate->renderer, 16, 16, 16, SDL_ALPHA_OPAQUE);  
     SDL_RenderClear(gamestate->renderer);
@@ -105,8 +124,23 @@ void draw_pause(GameState *gamestate){
         .w = 220,
         .h = 460,
     };
-
     SDL_RenderFillRect(gamestate->renderer,&some_rect);
+    Menu *pause = get_pause_menu();
+    int height = TTF_GetFontHeight(gamestate->font)+6;
+    int offset = (some_rect.h)/(pause->item_count+1);
+
+    float selected_height_pad = 24; 
+    rect.x = some_rect.x+20;
+    rect.y = some_rect.y+(offset*(pause->current+1))-selected_height_pad/2;
+    rect.w = 180;
+    rect.h = height+selected_height_pad;
+    
+    SDL_SetRenderDrawColor(gamestate->renderer, 16,16,16,255);
+    SDL_RenderFillRect(gamestate->renderer,&rect);
+
+    for(int i = 0; pause->item_count > i; ++i){
+        _draw_text_centered(some_rect.x, some_rect.y+(offset*(i+1)), 220, height, pause->item[i].text, gamestate->renderer, gamestate->font);
+    }
     SDL_RenderPresent(gamestate->renderer);
 }
 
@@ -175,22 +209,7 @@ void draw_corner_display(SDL_Renderer *renderer, CornerDisplay *display, TTF_Fon
     rect.h = display->title_h;
     SDL_RenderFillRect(renderer, &rect);
 
-    SDL_FRect dst;
-    const float scale = 1.0f;
-
-    SDL_Texture *font_texture = NULL;
-    SDL_Surface *text;
-    text = TTF_RenderText_Blended(font, title, 0, font_color);
-    font_texture = SDL_CreateTextureFromSurface(renderer, text);
-    
-    /* Center the text and scale it up */
-    SDL_SetRenderScale(renderer, scale, scale);
-    SDL_GetTextureSize(font_texture, &dst.w, &dst.h);
-    dst.x = display->x + (((display->w / scale) - dst.w) / 2);
-    dst.y = display->y + (((display->title_h / scale) - dst.h) / 2);
-
-    SDL_RenderTexture(renderer, font_texture, NULL, &dst);
-
+    _draw_text_centered(display->x, display->y, display->w, display->title_h, title, renderer, font);
 }
 
 
