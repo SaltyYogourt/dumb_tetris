@@ -9,10 +9,11 @@ Menu main_menu = {
     .up = up,
     .down = down,
     .item = { 
-        { .text = "Start"},
+        { .text = "Start",
+            .click = game_menu_start },
         { .text = "Online"},
         { .text = "Settings"},
-        { .text = "Exit"},
+        { .text = "Exit", },
     }
 };
 
@@ -27,7 +28,7 @@ Menu pause_menu = {
         { .text = "Restart",
             .click = pause_restart },
         { .text = "Exit",
-            .click = 0},
+            .click = pause_exit_to_menu },
     }
 };
 

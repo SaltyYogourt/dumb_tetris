@@ -1,3 +1,4 @@
+#include "menu.h"
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -42,7 +43,7 @@ void game_start(GameState *gamestate){
 
     gamestate->states[STATE_MENU].update = pause_loop; 
     gamestate->states[STATE_MENU].render = draw_main_menu;
-    gamestate->states[STATE_MENU].input = pause_event;
+    gamestate->states[STATE_MENU].input = game_menu_event;
     gamestate->states[STATE_MENU].enter = enter_exit_placeholder;
     gamestate->states[STATE_MENU].exit = enter_exit_placeholder;
 }
@@ -444,6 +445,11 @@ void game_loop(GameState *gamestate){
     }
 }
 
+void game_menu_start(GameState *gamestate){
+    game_init(gamestate);
+    setNextState(gamestate, &gamestate->states[STATE_GAMEPLAY]);
+}
+
 void game_pause(GameState *gamestate){
     //handle state change from "game" to "pause".
     setNextState(gamestate, &gamestate->states[STATE_PAUSE]);
@@ -459,11 +465,16 @@ void pause_restart(GameState *gamestate){
     SDL_Log("uh.");
 }
 
+void pause_exit_to_menu(GameState *gamestate){
+    setNextState(gamestate, &gamestate->states[STATE_MENU]);
+}
+
 void pause_loop(GameState *gamestate){
     //pass;
 }
 
 void pause_enter(GameState *gamestate){
+    get_pause_menu()->current = 0;
     gamestate->pause_tick = SDL_GetTicks();
 }
 

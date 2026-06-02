@@ -117,7 +117,7 @@ void draw_game(GameState *gamestate){
 }
 
 void draw_main_menu(GameState *gamestate){
-    SDL_SetRenderDrawColor(gamestate->renderer, 255,255,228,SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(gamestate->renderer, 128,64,48,SDL_ALPHA_OPAQUE);
     SDL_RenderClear(gamestate->renderer);
     Menu *main_menu = get_game_menu();
 
@@ -126,22 +126,20 @@ void draw_main_menu(GameState *gamestate){
     const int height = TTF_GetFontHeight(gamestate->font)+6;
     const int text_y = WINDOW_HEIGHT-bottom_padding-height;
 
-    int offset = (WINDOW_WIDTH-(x_padding*2))/(main_menu->item_count+1);
-
-    float selected_height_pad = 24; 
-    float selected_width_pad = 24; 
-    rect.x = x_padding+(offset*(main_menu->current+2))-(selected_width_pad/2.0);
-    rect.y = text_y;
-    rect.w = 100+x_padding; //we dunno the width so just use this placeholder for now...
+    int x_border  = 48;
+    int offset = (WINDOW_WIDTH-x_border)/(main_menu->item_count);
+    int selected_height_pad = 24; 
+    int selected_width_pad = 32; 
+    rect.x = (x_padding/2.0)+(x_border/2.0)+offset*(main_menu->current)-(selected_width_pad/2.0);
+    rect.y = text_y-(selected_height_pad/2.0);
+    rect.w = offset+selected_width_pad-x_padding;
     rect.h = height+selected_height_pad;
     
     SDL_SetRenderDrawColor(gamestate->renderer, 16,16,16,255);
     SDL_RenderFillRect(gamestate->renderer,&rect);
 
-    _draw_text_centered(320, 64, 100, height, "TEST", gamestate->renderer, gamestate->font);
-
     for(int i = 0; main_menu->item_count > i; ++i){
-        _draw_text_centered(x_padding+(offset*(i+2)), text_y, WINDOW_WIDTH/6, height, main_menu->item[i].text, gamestate->renderer, gamestate->font);
+        _draw_text_centered((x_padding/2.0)+(x_border/2.0)+offset*i, text_y, offset-x_padding, height, main_menu->item[i].text, gamestate->renderer, gamestate->font);
     }
 
     SDL_RenderPresent(gamestate->renderer);
