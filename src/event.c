@@ -80,3 +80,21 @@ void pause_event(GameState *gamestate, SDL_Event *event){
     }
 }
 
+void game_menu_event(GameState *gamestate, SDL_Event *event){
+    if (event->type == SDL_EVENT_KEY_DOWN){
+        Menu *game_menu = get_game_menu();
+        switch (event->key.scancode){
+            case SDL_SCANCODE_LEFT:
+                game_menu->up(game_menu);
+                break;
+            case SDL_SCANCODE_RIGHT:
+                game_menu->down(game_menu);
+                break;
+            case SDL_SCANCODE_RETURN:
+                game_menu->item[game_menu->current].click(gamestate);
+                break;
+            default:
+                break;
+        }
+    }
+}

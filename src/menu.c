@@ -3,19 +3,17 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_init.h>
 
-MenuElement main_menu_items[2] = {
-    { .text = "Start" },
-    { .text = "Exit" },
-};
-
 Menu main_menu = {
-    .item_count = 2,
+    .item_count = 4,
     .current = 0,
     .up = up,
     .down = down,
     .item = { 
-        { .text = "Start"},
-        { .text = "Exit"},
+        { .text = "Start",
+            .click = game_menu_start },
+        { .text = "Online"},
+        { .text = "Settings"},
+        { .text = "Exit", },
     }
 };
 
@@ -30,7 +28,7 @@ Menu pause_menu = {
         { .text = "Restart",
             .click = pause_restart },
         { .text = "Exit",
-            .click = 0},
+            .click = pause_exit_to_menu },
     }
 };
 

@@ -19,6 +19,7 @@ void calculate_corner_display(CornerDisplay *display, int pos);
 void draw_corner_display(SDL_Renderer *renderer, CornerDisplay *display, TTF_Font *font, char *title);
 void draw_tetromino_in_corner_display(SDL_Renderer *renderer, CornerDisplay *display, PieceData *tetromino);
 void draw_pause(GameState *gamestate);
+void draw_main_menu(GameState *gamestate);
 void draw_board(unsigned char (*board)[10], SDL_Renderer *renderer);
 void draw_player(Player *player, SDL_Renderer *renderer);
 void draw_player_shadow(Player *player, unsigned char (*board)[10], SDL_Renderer *renderer);

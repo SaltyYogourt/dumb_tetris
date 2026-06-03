@@ -4,6 +4,7 @@
 #include "menu.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_error.h>
+#include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
@@ -112,6 +113,35 @@ void _draw_game_screen(GameState *gamestate){
 
 void draw_game(GameState *gamestate){
     _draw_game_screen(gamestate);
+    SDL_RenderPresent(gamestate->renderer);
+}
+
+void draw_main_menu(GameState *gamestate){
+    SDL_SetRenderDrawColor(gamestate->renderer, 128,64,48,SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(gamestate->renderer);
+    Menu *main_menu = get_game_menu();
+
+    const int x_padding = 32;
+    const int bottom_padding = 64;
+    const int height = TTF_GetFontHeight(gamestate->font)+6;
+    const int text_y = WINDOW_HEIGHT-bottom_padding-height;
+
+    int x_border  = 48;
+    int offset = (WINDOW_WIDTH-x_border)/(main_menu->item_count);
+    int selected_height_pad = 24; 
+    int selected_width_pad = 32; 
+    rect.x = (x_padding/2.0)+(x_border/2.0)+offset*(main_menu->current)-(selected_width_pad/2.0);
+    rect.y = text_y-(selected_height_pad/2.0);
+    rect.w = offset+selected_width_pad-x_padding;
+    rect.h = height+selected_height_pad;
+    
+    SDL_SetRenderDrawColor(gamestate->renderer, 16,16,16,255);
+    SDL_RenderFillRect(gamestate->renderer,&rect);
+
+    for(int i = 0; main_menu->item_count > i; ++i){
+        _draw_text_centered((x_padding/2.0)+(x_border/2.0)+offset*i, text_y, offset-x_padding, height, main_menu->item[i].text, gamestate->renderer, gamestate->font);
+    }
+
     SDL_RenderPresent(gamestate->renderer);
 }
 
