@@ -90,7 +90,7 @@ void game_init(GameState *gamestate){
 
     //we're going pointer chasing baby
     gamestate->next_state = NULL;
-    gamestate->current_state = &gamestate->states[STATE_GAMEPLAY];
+    gamestate->current_state = &gamestate->states[STATE_GAMEPLAY_MAIN];
 
 
     init_lup_data();
@@ -469,16 +469,21 @@ void game_loop(GameState *gamestate){
 
 void game_menu_start(GameState *gamestate){
     game_init(gamestate);
-    setNextState(gamestate, &gamestate->states[STATE_GAMEPLAY]);
+    setNextState(gamestate, &gamestate->states[STATE_GAMEPLAY_MAIN]);
 }
 
 void game_pause(GameState *gamestate){
     //handle state change from "game" to "pause".
-    setNextState(gamestate, &gamestate->states[STATE_PAUSE]);
+    //FIXME: ? ideally we'd be switching the STATE_GAMEPLAY to point to other substates
+    //however this would require a state manager of some sorts and a much more complex architecture
+    //where switching internal states does a setNextState-like function.
+    //in other words we'd want state manager for both the main gameplay loop, and a super state manager
+    //managing the superstates... i'm too lazy so we'll just do this and have a flat structure
+    setNextState(gamestate, &gameplay_states[STATE_GAMEPLAY_PAUSE]);
 }
 
 void pause_unpause(GameState *gamestate){
-    setNextState(gamestate, &gamestate->states[STATE_GAMEPLAY]);
+    setNextState(gamestate, &gameplay_states[STATE_GAMEPLAY_MAIN]);
 }
 
 void pause_restart(GameState *gamestate){
