@@ -93,17 +93,15 @@ void _draw_text(int x, int y, int w, int h, int orientation, char* content, SDL_
     switch(orientation){
         case TEXT_LEFT: 
             dst.x = x;
-            dst.y = y;
             break;
         case TEXT_CENTER:
             dst.x = x + (((w / scale) - dst.w) / 2);
-            dst.y = y + (((h / scale) - dst.h) / 2);
             break;
         case TEXT_RIGHT:
             dst.x = x + ((w / scale) - dst.w);
-            dst.y = y + ((h / scale) - dst.y);
             break;
     }
+            dst.y = y + (((h / scale) - dst.h) / 2);
 
     SDL_RenderTexture(renderer, font_texture, NULL, &dst);
 }
