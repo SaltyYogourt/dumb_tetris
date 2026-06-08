@@ -469,7 +469,7 @@ void game_loop(GameState *gamestate){
 
 void game_menu_start(GameState *gamestate){
     game_init(gamestate);
-    setNextState(gamestate, &gamestate->states[STATE_GAMEPLAY_MAIN]);
+    setNextState(gamestate, &gameplay_states[STATE_GAMEPLAY_MAIN]);
 }
 
 void game_pause(GameState *gamestate){
