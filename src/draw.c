@@ -18,6 +18,12 @@ enum {  CORNER_DISPLAY_TOP_LEFT,
         CORNER_DISPLAY_BOTTOM_RIGHT = CORNER_DISPLAY_RIGHT | CORNER_DISPLAY_BOTTOM,
 };
 
+enum { 
+    TEXT_LEFT,
+    TEXT_CENTER,
+    TEXT_RIGHT
+};
+
 #define CORNER_DISPLAY_WIDTH_PADDING 0.05f
 #define CORNER_DISPLAY_HEIGHT_PADDING 0.015f
 #define CORNER_DISPLAY_HEIGHT_FRACTION 0.3f
@@ -72,7 +78,7 @@ void debug_gravity(GameState *gamestate){
     SDL_RenderDebugText(gamestate->renderer, 0, 24, debug_text);
 }
 
-void _draw_text_centered(int x, int y, int w, int h, char* content, SDL_Renderer *renderer, TTF_Font *font){
+void _draw_text(int x, int y, int w, int h, int orientation, char* content, SDL_Renderer *renderer, TTF_Font *font){
     SDL_FRect dst;
     const float scale = 1.0f;
 
@@ -84,8 +90,20 @@ void _draw_text_centered(int x, int y, int w, int h, char* content, SDL_Renderer
     /* Center the text and scale it up */
     SDL_SetRenderScale(renderer, scale, scale);
     SDL_GetTextureSize(font_texture, &dst.w, &dst.h);
-    dst.x = x + (((w / scale) - dst.w) / 2);
-    dst.y = y + (((h / scale) - dst.h) / 2);
+    switch(orientation){
+        case TEXT_LEFT: 
+            dst.x = x;
+            dst.y = y;
+            break;
+        case TEXT_CENTER:
+            dst.x = x + (((w / scale) - dst.w) / 2);
+            dst.y = y + (((h / scale) - dst.h) / 2);
+            break;
+        case TEXT_RIGHT:
+            dst.x = x + ((w / scale) - dst.w);
+            dst.y = y + ((h / scale) - dst.y);
+            break;
+    }
 
     SDL_RenderTexture(renderer, font_texture, NULL, &dst);
 }
@@ -139,10 +157,16 @@ void draw_main_menu(GameState *gamestate){
     SDL_RenderFillRect(gamestate->renderer,&rect);
 
     for(int i = 0; main_menu->item_count > i; ++i){
-        _draw_text_centered((x_padding/2.0)+(x_border/2.0)+offset*i, text_y, offset-x_padding, height, main_menu->item[i].text, gamestate->renderer, gamestate->font);
+        _draw_text((x_padding/2.0)+(x_border/2.0)+offset*i, text_y, offset-x_padding, height, TEXT_CENTER, main_menu->item[i].text, gamestate->renderer, gamestate->font);
     }
 
     SDL_RenderPresent(gamestate->renderer);
+}
+
+void draw_sub_menu(GameState *gamestate, Menu *submenu){
+    SDL_SetRenderDrawColor(gamestate->renderer, 128,64,48,SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(gamestate->renderer);
+    
 }
 
 void draw_pause(GameState *gamestate){
@@ -169,7 +193,7 @@ void draw_pause(GameState *gamestate){
     SDL_RenderFillRect(gamestate->renderer,&rect);
 
     for(int i = 0; pause->item_count > i; ++i){
-        _draw_text_centered(some_rect.x, some_rect.y+(offset*(i+1)), 220, height, pause->item[i].text, gamestate->renderer, gamestate->font);
+        _draw_text(some_rect.x, some_rect.y+(offset*(i+1)), 220, height, TEXT_CENTER, pause->item[i].text, gamestate->renderer, gamestate->font);
     }
     SDL_RenderPresent(gamestate->renderer);
 }
@@ -239,7 +263,7 @@ void draw_corner_display(SDL_Renderer *renderer, CornerDisplay *display, TTF_Fon
     rect.h = display->title_h;
     SDL_RenderFillRect(renderer, &rect);
 
-    _draw_text_centered(display->x, display->y, display->w, display->title_h, title, renderer, font);
+    _draw_text(display->x, display->y, display->w, display->title_h, TEXT_CENTER, title, renderer, font);
 }
 
 
