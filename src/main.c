@@ -13,10 +13,19 @@
 #include "state.h"
 
 #define LUP_LIST_COUNT 14
+#define GAMEPLAY_STATE_COUNT 3
+
+enum {
+    STATE_GAMEPLAY_MAIN,
+    STATE_GAMEPLAY_PAUSE,
+    STATE_GAMEPLAY_GAMEOVER,
+};
 
 static LevelData lup_list[LUP_LIST_COUNT];
 static short lup_point = 0;
 static float gravity_old = 0;
+
+static State gameplay_states[GAMEPLAY_STATE_COUNT];
 
 void game_start(GameState *gamestate){
     init_tetrominos(gamestate->piece_data);
@@ -29,17 +38,30 @@ void game_start(GameState *gamestate){
     //State init
     gamestate->states = (State*)SDL_malloc(sizeof(State)*STATES_COUNT);
 
-    gamestate->states[STATE_GAMEPLAY].update = game_loop;
-    gamestate->states[STATE_GAMEPLAY].render = draw_game;
-    gamestate->states[STATE_GAMEPLAY].input = gameplay_event;
-    gamestate->states[STATE_GAMEPLAY].enter = enter_exit_placeholder;
-    gamestate->states[STATE_GAMEPLAY].exit = enter_exit_placeholder;
 
-    gamestate->states[STATE_PAUSE].update = pause_loop; 
-    gamestate->states[STATE_PAUSE].render = draw_pause;
-    gamestate->states[STATE_PAUSE].input = pause_event;
-    gamestate->states[STATE_PAUSE].enter = pause_enter;
-    gamestate->states[STATE_PAUSE].exit = pause_exit;
+    gameplay_states[STATE_GAMEPLAY_MAIN].update = game_loop;
+    gameplay_states[STATE_GAMEPLAY_MAIN].render = draw_game;
+    gameplay_states[STATE_GAMEPLAY_MAIN].input = gameplay_event;
+    gameplay_states[STATE_GAMEPLAY_MAIN].enter = enter_exit_placeholder;
+    gameplay_states[STATE_GAMEPLAY_MAIN].exit = enter_exit_placeholder;
+
+    gameplay_states[STATE_GAMEPLAY_PAUSE].update = pause_loop; 
+    gameplay_states[STATE_GAMEPLAY_PAUSE].render = draw_pause;
+    gameplay_states[STATE_GAMEPLAY_PAUSE].input = pause_event;
+    gameplay_states[STATE_GAMEPLAY_PAUSE].enter = pause_enter;
+    gameplay_states[STATE_GAMEPLAY_PAUSE].exit = pause_exit;
+
+    gameplay_states[STATE_GAMEPLAY_GAMEOVER].update = pause_loop; 
+    gameplay_states[STATE_GAMEPLAY_GAMEOVER].render = draw_pause;
+    gameplay_states[STATE_GAMEPLAY_GAMEOVER].input = pause_event;
+    gameplay_states[STATE_GAMEPLAY_GAMEOVER].enter = pause_enter;
+    gameplay_states[STATE_GAMEPLAY_GAMEOVER].exit = pause_exit;
+
+    gamestate->states[STATE_GAMEPLAY].update = gameplay_states[STATE_GAMEPLAY_MAIN].update;
+    gamestate->states[STATE_GAMEPLAY].render = gameplay_states[STATE_GAMEPLAY_MAIN].render;
+    gamestate->states[STATE_GAMEPLAY].input = gameplay_states[STATE_GAMEPLAY_MAIN].input;
+    gamestate->states[STATE_GAMEPLAY].enter = gameplay_states[STATE_GAMEPLAY_MAIN].enter;
+    gamestate->states[STATE_GAMEPLAY].exit = gameplay_states[STATE_GAMEPLAY_MAIN].exit;
 
     gamestate->states[STATE_MENU].update = pause_loop; 
     gamestate->states[STATE_MENU].render = draw_main_menu;
@@ -68,7 +90,7 @@ void game_init(GameState *gamestate){
 
     //we're going pointer chasing baby
     gamestate->next_state = NULL;
-    gamestate->current_state = &gamestate->states[STATE_GAMEPLAY];
+    gamestate->current_state = &gamestate->states[STATE_GAMEPLAY_MAIN];
 
 
     init_lup_data();
@@ -447,22 +469,26 @@ void game_loop(GameState *gamestate){
 
 void game_menu_start(GameState *gamestate){
     game_init(gamestate);
-    setNextState(gamestate, &gamestate->states[STATE_GAMEPLAY]);
+    setNextState(gamestate, &gameplay_states[STATE_GAMEPLAY_MAIN]);
 }
 
 void game_pause(GameState *gamestate){
     //handle state change from "game" to "pause".
-    setNextState(gamestate, &gamestate->states[STATE_PAUSE]);
+    //FIXME: ? ideally we'd be switching the STATE_GAMEPLAY to point to other substates
+    //however this would require a state manager of some sorts and a much more complex architecture
+    //where switching internal states does a setNextState-like function.
+    //in other words we'd want state manager for both the main gameplay loop, and a super state manager
+    //managing the superstates... i'm too lazy so we'll just do this and have a flat structure
+    setNextState(gamestate, &gameplay_states[STATE_GAMEPLAY_PAUSE]);
 }
 
 void pause_unpause(GameState *gamestate){
-    setNextState(gamestate, &gamestate->states[STATE_GAMEPLAY]);
+    setNextState(gamestate, &gameplay_states[STATE_GAMEPLAY_MAIN]);
 }
 
 void pause_restart(GameState *gamestate){
     game_init(gamestate);
     pause_unpause(gamestate);
-    SDL_Log("uh.");
 }
 
 void pause_exit_to_menu(GameState *gamestate){

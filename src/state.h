@@ -8,7 +8,6 @@ enum {
     STATE_MENU,
     STATE_GAMEPLAY,
     STATE_GAME_OVER,
-    STATE_PAUSE,
 };
 
 typedef struct State {
