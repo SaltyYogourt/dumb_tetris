@@ -14,7 +14,24 @@ Menu main_menu = {
         { .text = "Online"},
         { .text = "Settings"},
         { .text = "Exit", },
-    }
+    },
+    .parent = NULL,
+};
+
+Menu settings_menu = {
+    .item_count = 6,
+    .current = 0,
+    .up = up,
+    .down = down,
+    .item = {
+        { .text = "Controls", },
+        { .text = "PLACEHOLDER", },
+        { .text = "PLACEHOLDER", },
+        { .text = "PLACEHOLDER", },
+        { .text = "PLACEHOLDER", },
+        { .text = "PLACEHOLDER", },
+    },
+    .parent = NULL,
 };
 
 Menu pause_menu = {
@@ -29,7 +46,8 @@ Menu pause_menu = {
             .click = pause_restart },
         { .text = "Exit",
             .click = pause_exit_to_menu },
-    }
+    },
+    .parent = NULL,
 };
 
 void up(Menu *self){
