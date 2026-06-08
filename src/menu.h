@@ -14,7 +14,6 @@ typedef struct Menu {
     int item_count;
     void (*up)(Menu *self);
     void (*down)(Menu *self);
-    Menu *parent;
     MenuElement item[];
 } Menu;
 
