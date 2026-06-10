@@ -161,10 +161,24 @@ void draw_main_menu(GameState *gamestate){
     SDL_RenderPresent(gamestate->renderer);
 }
 
-void draw_sub_menu(GameState *gamestate, Menu *submenu){
+void draw_sub_menu(GameState *gamestate){
     SDL_SetRenderDrawColor(gamestate->renderer, 128,64,48,SDL_ALPHA_OPAQUE);
     SDL_RenderClear(gamestate->renderer);
+
+    Menu *sub_menu = get_current_submenu();
     
+    const int height = TTF_GetFontHeight(gamestate->font);
+    const int x_padding = 12; //right side padding
+
+    rect.x = x_padding;
+    rect.y = height*sub_menu->current;
+    rect.w = WINDOW_WIDTH;
+    rect.h = height;
+
+    for(int i = 0; sub_menu->item_count > i; ++i){
+        _draw_text((x_padding/2.0), height*i, WINDOW_WIDTH, height, TEXT_LEFT, sub_menu->item[i].text, gamestate->renderer, gamestate->font);
+    }
+    SDL_RenderPresent(gamestate->renderer);
 }
 
 void draw_pause(GameState *gamestate){

@@ -4,9 +4,22 @@
 #include "game.h"
 typedef struct Menu Menu;
 
+#define MENU_STATE_COUNT 2
+
+enum {
+    STATE_MENU_MAIN,
+    STATE_MENU_SUB,
+};
+
+typedef struct {
+    GameState *gamestate;
+    void *vargs;
+} MenuArg;
+
 typedef struct {
     char *text;
-    void (*click)(GameState *gamestate);
+    void *arg;
+    void (*click)(void *args);
 } MenuElement;
 
 typedef struct Menu {
@@ -21,8 +34,11 @@ typedef struct Menu {
 void up(Menu *self);
 void down(Menu *self);
 Menu create_menu(MenuElement items[], int item_len);
+//void enter_submenu(void *submenu_ptr);
+void enter_submenu(void *args);
 
 Menu *get_pause_menu();
 Menu *get_game_menu();
+Menu *get_current_submenu();
 
 #endif

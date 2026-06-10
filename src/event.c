@@ -83,6 +83,7 @@ void pause_event(GameState *gamestate, SDL_Event *event){
 void game_menu_event(GameState *gamestate, SDL_Event *event){
     if (event->type == SDL_EVENT_KEY_DOWN){
         Menu *game_menu = get_game_menu();
+        MenuElement current = game_menu->item[game_menu->current];
         switch (event->key.scancode){
             case SDL_SCANCODE_LEFT:
                 game_menu->up(game_menu);
@@ -91,7 +92,46 @@ void game_menu_event(GameState *gamestate, SDL_Event *event){
                 game_menu->down(game_menu);
                 break;
             case SDL_SCANCODE_RETURN:
-                game_menu->item[game_menu->current].click(gamestate);
+                //if there's no arg we default to gamestate.
+                //this is due to the menu script never having the gamestate in scope.
+                //if we could do OOP properly we could avoid
+                //all this stupid shit. this is global arguments with extra steps.
+                if(current.arg){
+                    void *args[] = {current.arg, gamestate};
+                    current.click(args);
+                }
+                else{
+                    current.click(gamestate);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+
+void sub_menu_event(GameState *gamestate, SDL_Event *event){
+    if (event->type == SDL_EVENT_KEY_DOWN){
+        Menu *sub_menu = get_current_submenu();
+        MenuElement current = sub_menu->item[sub_menu->current];
+        switch (event->key.scancode){
+            case SDL_SCANCODE_UP:
+                sub_menu->up(sub_menu);
+                break;
+            case SDL_SCANCODE_DOWN:
+                sub_menu->down(sub_menu);
+                break;
+            case SDL_SCANCODE_BACKSPACE:
+                //todo: go back
+                break;
+            case SDL_SCANCODE_RETURN:
+                if(current.arg){
+                    void *args[] = {gamestate, current.arg};
+                    current.click(args);
+                }
+                else
+                    current.click(gamestate);
                 break;
             default:
                 break;

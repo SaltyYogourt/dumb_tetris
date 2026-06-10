@@ -9,5 +9,6 @@ enum { ROT_DIR_CLOCKWISE = 1, ROT_DIR_COUNTERCLOCKWISE = -1 };
 void gameplay_event(GameState *gamestate, SDL_Event *event);
 void pause_event(GameState *gamestate, SDL_Event *event);
 void game_menu_event(GameState *gamestate, SDL_Event *event);
+void sub_menu_event(GameState *gamestate, SDL_Event *event);
 
 #endif
