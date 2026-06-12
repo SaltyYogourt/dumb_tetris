@@ -174,6 +174,8 @@ void draw_sub_menu(GameState *gamestate){
     rect.y = height*sub_menu->current;
     rect.w = WINDOW_WIDTH;
     rect.h = height;
+    SDL_SetRenderDrawColor(gamestate->renderer, 16,16,16,255);
+    SDL_RenderFillRect(gamestate->renderer,&rect);
 
     for(int i = 0; sub_menu->item_count > i; ++i){
         _draw_text((x_padding/2.0), height*i, WINDOW_WIDTH, height, TEXT_LEFT, sub_menu->item[i].text, gamestate->renderer, gamestate->font);

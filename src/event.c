@@ -123,11 +123,11 @@ void sub_menu_event(GameState *gamestate, SDL_Event *event){
                 sub_menu->down(sub_menu);
                 break;
             case SDL_SCANCODE_BACKSPACE:
-                //todo: go back
+                exit_submenu(gamestate);
                 break;
             case SDL_SCANCODE_RETURN:
                 if(current.arg){
-                    void *args[] = {gamestate, current.arg};
+                    void *args[] = {current.arg, gamestate};
                     current.click(args);
                 }
                 else

@@ -90,9 +90,29 @@ void down(Menu *self){
 }
 
 void enter_submenu(void *args){
+    Menu *parent = current_submenu;
     current_submenu = (Menu*)(((void**)(args))[0]);
-    SDL_Log("%d\n", current_submenu->item_count);
-    setNextState((GameState*)(((void**)(args))[1]), &menu_states[STATE_MENU_SUB]);
+    if(!parent){
+        parent = &main_menu;
+    }
+    current_submenu->parent = parent;
+    current_submenu->current = 0;
+    GameState *gamestate  = (GameState*)(((void**)(args))[1]);
+    if(gamestate->current_state != &menu_states[STATE_MENU_SUB]){
+        setNextState(gamestate, &menu_states[STATE_MENU_SUB]);
+    }
+}
+
+void exit_submenu(void *args){
+    if(!current_submenu->parent)
+        return; //how did we get here?
+    if(current_submenu->parent == &main_menu){
+        setNextState((GameState*)args, &menu_states[STATE_MENU_MAIN]);
+        current_submenu = NULL;
+    }
+    else{
+        current_submenu = current_submenu->parent;
+    }
 }
 
 Menu *get_pause_menu(){
