@@ -12,11 +12,6 @@ enum {
 };
 
 typedef struct {
-    GameState *gamestate;
-    void *vargs;
-} MenuArg;
-
-typedef struct {
     char *text;
     void *arg;
     void (*click)(void *args);
@@ -34,7 +29,6 @@ typedef struct Menu {
 void up(Menu *self);
 void down(Menu *self);
 Menu create_menu(MenuElement items[], int item_len);
-//void enter_submenu(void *submenu_ptr);
 void enter_submenu(void *args);
 void exit_submenu(void *args);
 
