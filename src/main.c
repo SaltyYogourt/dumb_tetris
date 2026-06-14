@@ -489,7 +489,7 @@ void pause_restart(void *gamestate){
 }
 
 void pause_exit_to_menu(void *gamestate){
-    setNextState(gamestate, &((GameState*)gamestate)->states[STATE_MENU]);
+    setNextState(gamestate, &menu_states[STATE_MENU_MAIN]);
 }
 
 void pause_loop(GameState *gamestate){
