@@ -32,6 +32,7 @@ Menu create_menu(MenuElement items[], int item_len);
 void enter_submenu(void *args);
 void exit_submenu(void *args);
 
+Menu *get_gameover_menu();
 Menu *get_pause_menu();
 Menu *get_game_menu();
 Menu *get_current_submenu();

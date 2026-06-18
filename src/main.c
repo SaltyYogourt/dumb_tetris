@@ -53,10 +53,10 @@ void game_start(GameState *gamestate){
     gameplay_states[STATE_GAMEPLAY_PAUSE].exit = pause_exit;
 
     gameplay_states[STATE_GAMEPLAY_GAMEOVER].update = pause_loop; 
-    gameplay_states[STATE_GAMEPLAY_GAMEOVER].render = draw_pause;
-    gameplay_states[STATE_GAMEPLAY_GAMEOVER].input = pause_event;
-    gameplay_states[STATE_GAMEPLAY_GAMEOVER].enter = pause_enter;
-    gameplay_states[STATE_GAMEPLAY_GAMEOVER].exit = pause_exit;
+    gameplay_states[STATE_GAMEPLAY_GAMEOVER].render = draw_gameover;
+    gameplay_states[STATE_GAMEPLAY_GAMEOVER].input = gameover_event;
+    gameplay_states[STATE_GAMEPLAY_GAMEOVER].enter = enter_exit_placeholder;
+    gameplay_states[STATE_GAMEPLAY_GAMEOVER].exit = enter_exit_placeholder;
 
     menu_states[STATE_MENU_MAIN].update = pause_loop; 
     menu_states[STATE_MENU_MAIN].render = draw_main_menu;
@@ -443,6 +443,7 @@ void update_game(GameState *gamestate)
             new_tetromino(gamestate, new_tetromino_idx, STARTING_Y);
             if(check_collisiong2(gamestate) & T_BOUND_OVERLAP) { 
                 SDL_Log("oops");
+                gameover(gamestate);
             }
             reset_delay(gamestate);
             gamestate->gravity_step = 0;
@@ -503,6 +504,10 @@ void pause_enter(GameState *gamestate){
 
 void pause_exit(GameState *gamestate){
     gamestate->last_tick += (SDL_GetTicks()-gamestate->pause_tick);
+}
+
+void gameover(GameState *gamestate){
+    setNextState(gamestate, &gameplay_states[STATE_GAMEPLAY_GAMEOVER]);
 }
 
 SDL_AppResult SDL_AppIterate(void *appstate)

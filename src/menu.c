@@ -41,6 +41,22 @@ Menu settings_submenu = {
     .parent = NULL,
 };
 
+Menu gameover_menu = {
+    .item_count = 2,
+    .current = 0,
+    .up = up,
+    .down = down,
+    .item = { 
+        { .text = "Restart",
+            .click = menu_game_start,
+            .arg = NULL },
+        { .text = "Exit",
+            .click = pause_exit_to_menu,
+            .arg = NULL },
+    },
+    .parent = NULL,
+};
+
 Menu pause_menu = {
     .item_count = 3,
     .current = 0,
@@ -113,6 +129,10 @@ void exit_submenu(void *args){
     else{
         current_submenu = current_submenu->parent;
     }
+}
+
+Menu *get_gameover_menu(){
+    return &gameover_menu;
 }
 
 Menu *get_pause_menu(){

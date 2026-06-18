@@ -5,6 +5,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_pixels.h>
+#include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
@@ -183,6 +184,44 @@ void draw_sub_menu(GameState *gamestate){
     for(int i = 0; sub_menu->item_count > i; ++i){
         _draw_text((x_padding/2.0), (height+height_padding)*i, WINDOW_WIDTH, height+height_padding, TEXT_LEFT, sub_menu->item[i].text, gamestate->renderer, gamestate->font);
     }
+    SDL_RenderPresent(gamestate->renderer);
+}
+
+void draw_gameover(GameState *gamestate){
+    _draw_game_screen(gamestate);
+    SDL_SetRenderDrawColor(gamestate->renderer, 64,192,192,128);
+
+    SDL_FRect gameover_screen = {
+        .x = WINDOW_WIDTH*0.3,
+        .y = WINDOW_HEIGHT*0.1,
+        .w = WINDOW_WIDTH*0.4,
+        .h = WINDOW_HEIGHT*0.8,
+    };
+
+    SDL_RenderFillRect(gamestate->renderer, &gameover_screen);
+    Menu *gameover = get_gameover_menu();
+
+    const int gameover_text_height = gameover_screen.h*0.3; //we use this as the startpoint for buttons
+    const int gameover_button_segment = gameover_screen.h-gameover_text_height;
+
+    int offset = (gameover_button_segment)/(gameover->item_count+1);
+    int text_height = TTF_GetFontHeight(gamestate->font)+6;
+
+    float selected_pad = 24; 
+    rect.x = gameover_screen.x+selected_pad/2.0f;
+    rect.y = gameover_text_height+(offset*(gameover->current+1))-selected_pad/2.0;
+    rect.w = gameover_screen.w-selected_pad;
+    rect.h = text_height+selected_pad;
+
+    SDL_SetRenderDrawColor(gamestate->renderer, 16,16,16,255);
+    SDL_RenderFillRect(gamestate->renderer,&rect);
+
+    _draw_text(gameover_screen.x, gameover_screen.y, gameover_screen.w, gameover_text_height, TEXT_CENTER, "GAME OVER", gamestate->renderer, gamestate->font);
+
+    for(int i = 0; gameover->item_count > i; ++i){
+        _draw_text(gameover_screen.x, gameover_text_height+(offset*(i+1)), gameover_screen.w, text_height, TEXT_CENTER, gameover->item[i].text, gamestate->renderer, gamestate->font);
+    }
+
     SDL_RenderPresent(gamestate->renderer);
 }
 
