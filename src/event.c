@@ -63,7 +63,7 @@ void pause_event(GameState *gamestate, SDL_Event *event){
         Menu *pause_menu = get_pause_menu();
         switch (event->key.scancode){
             case SDL_SCANCODE_P:
-                setNextState(gamestate, &gamestate->states[STATE_GAMEPLAY]);
+                 pause_unpause(gamestate);
                 break;
             case SDL_SCANCODE_UP:
                 pause_menu->up(pause_menu);
