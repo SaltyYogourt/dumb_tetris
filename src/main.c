@@ -1,10 +1,10 @@
-#include "menu.h"
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
+#include "menu.h"
 #include "main.h"
 #include "tetromino.h"
 #include "draw.h"
@@ -24,6 +24,7 @@ enum {
 static LevelData lup_list[LUP_LIST_COUNT];
 static short lup_point = 0;
 static float gravity_old = 0;
+extern State menu_states[];
 
 static State gameplay_states[GAMEPLAY_STATE_COUNT];
 
@@ -57,17 +58,17 @@ void game_start(GameState *gamestate){
     gameplay_states[STATE_GAMEPLAY_GAMEOVER].enter = pause_enter;
     gameplay_states[STATE_GAMEPLAY_GAMEOVER].exit = pause_exit;
 
-    gamestate->states[STATE_GAMEPLAY].update = gameplay_states[STATE_GAMEPLAY_MAIN].update;
-    gamestate->states[STATE_GAMEPLAY].render = gameplay_states[STATE_GAMEPLAY_MAIN].render;
-    gamestate->states[STATE_GAMEPLAY].input = gameplay_states[STATE_GAMEPLAY_MAIN].input;
-    gamestate->states[STATE_GAMEPLAY].enter = gameplay_states[STATE_GAMEPLAY_MAIN].enter;
-    gamestate->states[STATE_GAMEPLAY].exit = gameplay_states[STATE_GAMEPLAY_MAIN].exit;
+    menu_states[STATE_MENU_MAIN].update = pause_loop; 
+    menu_states[STATE_MENU_MAIN].render = draw_main_menu;
+    menu_states[STATE_MENU_MAIN].input = game_menu_event;
+    menu_states[STATE_MENU_MAIN].enter = enter_exit_placeholder;
+    menu_states[STATE_MENU_MAIN].exit = enter_exit_placeholder;
 
-    gamestate->states[STATE_MENU].update = pause_loop; 
-    gamestate->states[STATE_MENU].render = draw_main_menu;
-    gamestate->states[STATE_MENU].input = game_menu_event;
-    gamestate->states[STATE_MENU].enter = enter_exit_placeholder;
-    gamestate->states[STATE_MENU].exit = enter_exit_placeholder;
+    menu_states[STATE_MENU_SUB].update = pause_loop; 
+    menu_states[STATE_MENU_SUB].render = draw_sub_menu;
+    menu_states[STATE_MENU_SUB].input = sub_menu_event;
+    menu_states[STATE_MENU_SUB].enter = enter_exit_placeholder;
+    menu_states[STATE_MENU_SUB].exit = enter_exit_placeholder;
 }
 
 void game_init(GameState *gamestate){
@@ -87,11 +88,6 @@ void game_init(GameState *gamestate){
     gamestate->next_tetromino_id = get_random_tetromino(gamestate->piece_history_idx);
     new_tetromino(gamestate, get_next(gamestate), STARTING_Y);
     player->held_tetromino_id = 255;
-
-    //we're going pointer chasing baby
-    gamestate->next_state = NULL;
-    gamestate->current_state = &gamestate->states[STATE_GAMEPLAY_MAIN];
-
 
     init_lup_data();
     LevelData *lup_data = NULL;
@@ -302,9 +298,10 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     game_start(gamestate);
     gamestate->next_state = NULL;
-    gamestate->current_state = &gamestate->states[STATE_MENU];
+    //gamestate->current_state = &gameplay_states[STATE_GAMEPLAY_MAIN];
+    gamestate->current_state = &menu_states[STATE_MENU_MAIN];
 
-    //game_init(gamestate);
+    game_init(gamestate);
     draw_init(gamestate);
 
     return SDL_APP_CONTINUE;  
@@ -467,7 +464,7 @@ void game_loop(GameState *gamestate){
     }
 }
 
-void game_menu_start(GameState *gamestate){
+void menu_game_start(void *gamestate){
     game_init(gamestate);
     setNextState(gamestate, &gameplay_states[STATE_GAMEPLAY_MAIN]);
 }
@@ -482,17 +479,17 @@ void game_pause(GameState *gamestate){
     setNextState(gamestate, &gameplay_states[STATE_GAMEPLAY_PAUSE]);
 }
 
-void pause_unpause(GameState *gamestate){
+void pause_unpause(void *gamestate){
     setNextState(gamestate, &gameplay_states[STATE_GAMEPLAY_MAIN]);
 }
 
-void pause_restart(GameState *gamestate){
+void pause_restart(void *gamestate){
     game_init(gamestate);
     pause_unpause(gamestate);
 }
 
-void pause_exit_to_menu(GameState *gamestate){
-    setNextState(gamestate, &gamestate->states[STATE_MENU]);
+void pause_exit_to_menu(void *gamestate){
+    setNextState(gamestate, &menu_states[STATE_MENU_MAIN]);
 }
 
 void pause_loop(GameState *gamestate){
