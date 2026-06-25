@@ -19,7 +19,7 @@ typedef struct {
 
 typedef struct Menu {
     unsigned int current;
-    int item_count;
+    unsigned int item_count;
     void (*up)(Menu *self);
     void (*down)(Menu *self);
     Menu *parent;
