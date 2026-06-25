@@ -46,3 +46,6 @@ main
 *.pdb
 
 build/*
+
+# vip swap files???
+*.swp
