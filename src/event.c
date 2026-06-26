@@ -6,6 +6,7 @@
 
 void gameplay_event(GameState *gamestate, SDL_Event *event){
     if (event->type == SDL_EVENT_KEY_DOWN){
+        printf("Keycode: %s\n", SDL_GetScancodeName(event->key.scancode));
         switch (event->key.scancode){
             case SDL_SCANCODE_D:
                 movx(gamestate, T_MOVE_RIGHT);
