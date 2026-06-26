@@ -69,6 +69,8 @@ void game_start(GameState *gamestate){
     menu_states[STATE_MENU_SUB].input = sub_menu_event;
     menu_states[STATE_MENU_SUB].enter = enter_exit_placeholder;
     menu_states[STATE_MENU_SUB].exit = enter_exit_placeholder;
+
+    default_events();
 }
 
 void game_init(GameState *gamestate){
