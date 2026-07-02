@@ -181,8 +181,12 @@ void draw_sub_menu(GameState *gamestate){
     SDL_SetRenderDrawColor(gamestate->renderer, 16,16,16,255);
     SDL_RenderFillRect(gamestate->renderer,&rect);
 
+    char *rtext = NULL;
     for(int i = 0; sub_menu->item_count > i; ++i){
         _draw_text((x_padding/2.0), (height+height_padding)*i, WINDOW_WIDTH, height+height_padding, TEXT_LEFT, sub_menu->item[i].text, gamestate->renderer, gamestate->font);
+        if((rtext = sub_menu->item[i].rtext)){
+            _draw_text(-(x_padding/2.0), (height+height_padding)*i, WINDOW_WIDTH, height+height_padding, TEXT_RIGHT, rtext, gamestate->renderer, gamestate->font);
+        }
     }
     SDL_RenderPresent(gamestate->renderer);
 }
