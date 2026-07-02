@@ -1,17 +1,80 @@
 #include "menu.h"
 #include "main.h"
 #include "state.h"
+#include "event.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_init.h>
+#include <SDL3/SDL_keyboard.h>
 
 Menu *current_submenu = NULL;
 
 State menu_states[MENU_STATE_COUNT];
 
+
 void init_menu_states(){
 }
 
-Menu controls_submenu = {
+void rebind_key(short scancode, short key){
+
+}
+
+Menu *init_controls_submenu(){
+    Menu *ctrls = SDL_malloc(CMD_COUNT*sizeof(MenuElement) + sizeof(Menu));
+    ctrls->current = 0;
+    ctrls->up = up;
+    ctrls->down = down;
+    ctrls->parent = NULL;
+    
+    load_controls_buttons(ctrls->item);
+
+    ctrls->item_count = CMD_COUNT-1;
+    return ctrls;
+}
+
+void load_controls_buttons(MenuElement *items){
+
+    for(int i = 0; GAME_CMD_COUNT > i; ++i){
+        //items[i].text = SDL_GetScancodeName(game_event_codes[i]);
+        items[i].rtext = SDL_malloc(32);
+        SDL_strlcpy(items[i].rtext, SDL_GetScancodeName(game_event_codes[i]), 32);
+        //items[i].click = rebind_key;
+    }
+
+    for(int i = GAME_CMD_COUNT; CMD_COUNT > i; ++i){
+        items[i].rtext = SDL_malloc(32);
+        //items[i].text = SDL_GetScancodeName(menu_event_codes[i-GAME_CMD_COUNT]);
+        SDL_strlcpy(items[i].rtext, SDL_GetScancodeName(menu_event_codes[i-GAME_CMD_COUNT]), 32);
+    }
+    items[GAME_ROT_CW].text = "Rotate Clockwise";
+    items[GAME_ROT_CCW].text = "Rotate Counter-clockwise";
+    items[GAME_LEFT].text = "Move Left";
+    items[GAME_RIGHT].text = "Move Right";
+    items[GAME_HOLD].text = "Hold";
+    items[GAME_SOFTDROP].text = "Softdrop";
+    items[GAME_HARDDROP].text = "Harddrop";
+    items[GAME_PAUSE].text = "Pause";
+
+    items[GAME_DEBUG_RESET_GRAVITY].text = "DEBUG: Reset Gravity";
+    items[GAME_DEBUG_INCREASE_GRAVITY].text = "DEBUG: Increase Gravity";
+    items[GAME_DEBUG_DECREASE_GRAVITY].text = "DEBUG: Decrease Gravity";
+
+    items[GAME_CMD_COUNT+MENU_UP].text = "Menu Up";
+    items[GAME_CMD_COUNT+MENU_DOWN].text = "Menu Down";
+    items[GAME_CMD_COUNT+MENU_LEFT].text = "Menu Left";
+    items[GAME_CMD_COUNT+MENU_RIGHT].text = "Menu Right";
+    items[GAME_CMD_COUNT+MENU_SELECT].text = "Confirm";
+    items[GAME_CMD_COUNT+MENU_BACK].text = "Back";
+}
+
+void unload_controls_buttons(MenuElement *items){
+    for(int i = 0; CMD_COUNT > i; ++i){
+        SDL_free(items[i].text);
+    }
+}
+
+Menu *controls_submenu = NULL;
+
+Menu controls_submenu_placeholder = {
     .item_count = 2,
     .current = 0,
     .up = up,
@@ -30,8 +93,9 @@ Menu settings_submenu = {
     .down = down,
     .item = {
         { .text = "Controls", 
+          .rtext = "rtext placeholder",
           .click = enter_submenu,
-          .arg = &controls_submenu },
+          .arg = 0 },
         { .text = "PLACEHOLDER", },
         { .text = "PLACEHOLDER", },
         { .text = "PLACEHOLDER", },
@@ -130,6 +194,18 @@ void exit_submenu(void *args){
         current_submenu = current_submenu->parent;
     }
 }
+
+void enter_menu(GameState *gamestate){
+    controls_submenu = init_controls_submenu();
+    settings_submenu.item[0].arg = controls_submenu;
+}
+
+void exit_menu(GameState *gamestate){
+    //unload_controls_buttons(controls_submenu->item);
+    //SDL_free(controls_submenu);
+    //controls_submenu = NULL;
+}
+
 
 Menu *get_gameover_menu(){
     return &gameover_menu;

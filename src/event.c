@@ -2,29 +2,52 @@
 #include "game.h"
 #include "main.h"
 #include "menu.h"
-#include "state.h"
+#include <SDL3/SDL_scancode.h>
 
-int scancode_game_events[256] = { -1 };
-int scancode_menu_events[256] = { -1 };
+char scancode_game_events[SDL_SCANCODE_COUNT];
+char scancode_menu_events[SDL_SCANCODE_COUNT];
+
+//USB HID usage tables 0x07 define 0 as no event indicated, so do we.
+unsigned short game_event_codes[GAME_CMD_COUNT];
+unsigned short menu_event_codes[MENU_CMD_COUNT];
+
+#define MAP_KEY(a,m,k,ev) \
+    do { \
+       a[k] = ev; \
+       m[ev] = k; \
+    } while(0)
+
+#define MAP_GAME_KEY(k,ev) MAP_KEY(scancode_game_events,game_event_codes,k,ev)
+#define MAP_MENU_KEY(k,ev) MAP_KEY(scancode_menu_events,menu_event_codes,k,ev)
 
 void default_events(){
-    scancode_game_events[SDL_SCANCODE_UP] = GAME_ROT_CW;
-    scancode_game_events[SDL_SCANCODE_DOWN] = GAME_ROT_CCW;
-    scancode_game_events[SDL_SCANCODE_LEFT] = GAME_LEFT;
-    scancode_game_events[SDL_SCANCODE_RIGHT] = GAME_RIGHT;
-    scancode_game_events[SDL_SCANCODE_LSHIFT] = GAME_SOFTDROP;
-    scancode_game_events[SDL_SCANCODE_SPACE] = GAME_HARDDROP;
-    scancode_game_events[SDL_SCANCODE_C] = GAME_HOLD;
-    scancode_game_events[SDL_SCANCODE_P] = GAME_PAUSE;
+    SDL_memset(scancode_game_events, -1, SDL_SCANCODE_COUNT);
+    SDL_memset(scancode_menu_events, -1, SDL_SCANCODE_COUNT);
 
+    MAP_GAME_KEY(SDL_SCANCODE_UP,GAME_ROT_CW);
+    MAP_GAME_KEY(SDL_SCANCODE_DOWN,GAME_ROT_CCW);
+    MAP_GAME_KEY(SDL_SCANCODE_LEFT,GAME_LEFT);
+    MAP_GAME_KEY(SDL_SCANCODE_RIGHT,GAME_RIGHT);
 
-    scancode_menu_events[SDL_SCANCODE_UP] = MENU_UP;
-    scancode_menu_events[SDL_SCANCODE_DOWN] = MENU_DOWN;
-    scancode_menu_events[SDL_SCANCODE_LEFT] = MENU_LEFT;
-    scancode_menu_events[SDL_SCANCODE_RIGHT] = MENU_RIGHT;
+    MAP_GAME_KEY(SDL_SCANCODE_LSHIFT,GAME_SOFTDROP);
+    MAP_GAME_KEY(SDL_SCANCODE_SPACE,GAME_HARDDROP);
+
+    MAP_GAME_KEY(SDL_SCANCODE_C,GAME_HOLD);
+    MAP_GAME_KEY(SDL_SCANCODE_P,GAME_PAUSE);
+
+#ifdef DEBUG
+    MAP_GAME_KEY(SDL_SCANCODE_R,GAME_DEBUG_RESET_GRAVITY);
+    MAP_GAME_KEY(SDL_SCANCODE_1,GAME_DEBUG_INCREASE_GRAVITY);
+    MAP_GAME_KEY(SDL_SCANCODE_2,GAME_DEBUG_DECREASE_GRAVITY);
+#endif
+
+    MAP_MENU_KEY(SDL_SCANCODE_UP,MENU_UP);
+    MAP_MENU_KEY(SDL_SCANCODE_DOWN,MENU_DOWN);
+    MAP_MENU_KEY(SDL_SCANCODE_LEFT,MENU_LEFT);
+    MAP_MENU_KEY(SDL_SCANCODE_RIGHT,MENU_RIGHT);
      
-    scancode_menu_events[SDL_SCANCODE_Z] = MENU_SELECT;
-    scancode_menu_events[SDL_SCANCODE_X] = MENU_BACK;
+    MAP_MENU_KEY(SDL_SCANCODE_Z,MENU_SELECT);
+    MAP_MENU_KEY(SDL_SCANCODE_X,MENU_BACK);
 }
  
 
@@ -32,7 +55,7 @@ void default_events(){
 void gameplay_event(GameState *gamestate, SDL_Event *event){
     short scancode_ev = scancode_game_events[event->key.scancode];
     if (event->type == SDL_EVENT_KEY_DOWN){
-        printf("Keycode: %s\n", SDL_GetScancodeName(event->key.scancode));
+        SDL_Log("Keycode: %s\n", SDL_GetScancodeName(event->key.scancode));
         switch (scancode_ev){
             case GAME_RIGHT:
                 movx(gamestate, T_MOVE_RIGHT);
@@ -143,8 +166,11 @@ void gameover_event(GameState *gamestate, SDL_Event *event){
 }
 
 void game_menu_event(GameState *gamestate, SDL_Event *event){
-    short scancode_ev = scancode_menu_events[event->key.scancode];
-    SDL_Log("%d\n", scancode_ev);
+    short scancode_ev = -1;
+    if (event->type == SDL_EVENT_KEY_DOWN || event->type == SDL_EVENT_KEY_UP){
+        scancode_ev = scancode_menu_events[event->key.scancode];
+        SDL_Log("%d\n", scancode_ev);
+    }
     if (event->type == SDL_EVENT_KEY_DOWN){
         Menu *game_menu = get_game_menu();
         MenuElement current = game_menu->item[game_menu->current];
