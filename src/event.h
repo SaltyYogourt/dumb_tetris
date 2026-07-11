@@ -38,7 +38,7 @@ enum KeyCommandsMenu : char {
     MENU_CMD_COUNT //ditto
 };
 
-#define CMD_COUNT GAME_CMD_COUNT+MENU_CMD_COUNT
+#define CMD_COUNT (GAME_CMD_COUNT+MENU_CMD_COUNT)
 
 extern unsigned short game_event_codes[GAME_CMD_COUNT];
 extern unsigned short menu_event_codes[MENU_CMD_COUNT];
