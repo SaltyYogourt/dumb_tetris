@@ -19,7 +19,8 @@ void rebind_key(short scancode, short key){
 }
 
 Menu *init_controls_submenu(){
-    Menu *ctrls = SDL_malloc(CMD_COUNT*sizeof(MenuElement) + sizeof(Menu));
+    size_t menu_elements_size = CMD_COUNT * sizeof(MenuElement);
+    Menu *ctrls = SDL_malloc(sizeof(Menu) + menu_elements_size);
     ctrls->current = 0;
     ctrls->up = up;
     ctrls->down = down;
@@ -34,16 +35,13 @@ Menu *init_controls_submenu(){
 void load_controls_buttons(MenuElement *items){
 
     for(int i = 0; GAME_CMD_COUNT > i; ++i){
-        //items[i].text = SDL_GetScancodeName(game_event_codes[i]);
-        items[i].rtext = SDL_malloc(32);
-        SDL_strlcpy(items[i].rtext, SDL_GetScancodeName(game_event_codes[i]), 32);
+        items[i].rtext = SDL_strdup(SDL_GetScancodeName(game_event_codes[i]));
         //items[i].click = rebind_key;
     }
 
     for(int i = GAME_CMD_COUNT; CMD_COUNT > i; ++i){
-        items[i].rtext = SDL_malloc(32);
-        //items[i].text = SDL_GetScancodeName(menu_event_codes[i-GAME_CMD_COUNT]);
-        SDL_strlcpy(items[i].rtext, SDL_GetScancodeName(menu_event_codes[i-GAME_CMD_COUNT]), 32);
+        items[i].rtext = SDL_strdup(SDL_GetScancodeName(menu_event_codes[i-GAME_CMD_COUNT]));
+        //items[i].click = rebind_key;
     }
     items[GAME_ROT_CW].text = "Rotate Clockwise";
     items[GAME_ROT_CCW].text = "Rotate Counter-clockwise";
