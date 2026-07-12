@@ -28,7 +28,7 @@ Menu *init_controls_submenu(){
     
     load_controls_buttons(ctrls->item);
 
-    ctrls->item_count = CMD_COUNT-1;
+    ctrls->item_count = CMD_COUNT;
     return ctrls;
 }
 
