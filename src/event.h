@@ -49,5 +49,6 @@ void gameover_event(GameState *gamestate, SDL_Event *event);
 void pause_event(GameState *gamestate, SDL_Event *event);
 void game_menu_event(GameState *gamestate, SDL_Event *event);
 void sub_menu_event(GameState *gamestate, SDL_Event *event);
+void key_rebind(void *args);
 
 #endif

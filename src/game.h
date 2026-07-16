@@ -55,6 +55,7 @@ typedef struct GameState {
     float gravity;
     float gravity_step;
     char held_once;
+    char input_locked;
     short level;
     int lock_time;
     int next_tetromino_id;

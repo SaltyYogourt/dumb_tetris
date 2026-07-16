@@ -26,22 +26,24 @@ Menu *init_controls_submenu(){
     ctrls->down = down;
     ctrls->parent = NULL;
     
-    load_controls_buttons(ctrls->item);
+    load_controls_buttons(ctrls->item, &ctrls->current);
 
     ctrls->item_count = CMD_COUNT;
     return ctrls;
 }
 
-void load_controls_buttons(MenuElement *items){
+void load_controls_buttons(MenuElement *items, unsigned int *current_button){
 
     for(int i = 0; GAME_CMD_COUNT > i; ++i){
         items[i].rtext = SDL_strdup(SDL_GetScancodeName(game_event_codes[i]));
-        //items[i].click = rebind_key;
+        items[i].click = key_rebind;
+        items[i].arg = current_button;
     }
 
     for(int i = GAME_CMD_COUNT; CMD_COUNT > i; ++i){
         items[i].rtext = SDL_strdup(SDL_GetScancodeName(menu_event_codes[i-GAME_CMD_COUNT]));
-        //items[i].click = rebind_key;
+        items[i].click = key_rebind;
+        items[i].arg = current_button;
     }
     items[GAME_ROT_CW].text = "Rotate Clockwise";
     items[GAME_ROT_CCW].text = "Rotate Counter-clockwise";
