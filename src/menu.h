@@ -28,7 +28,7 @@ typedef struct Menu {
     MenuElement item[];
 } Menu;
 
-void load_controls_buttons(MenuElement *items);
+void load_controls_buttons(MenuElement *items, unsigned int *current_button);
 
 void up(Menu *self);
 void down(Menu *self);

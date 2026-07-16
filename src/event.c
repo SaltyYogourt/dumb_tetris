@@ -1,9 +1,11 @@
 #include "event.h"
 #include "game.h"
+#include "state.h"
 #include "main.h"
 #include "menu.h"
 #include <SDL3/SDL_scancode.h>
 
+char event_to_rebind = -1;
 char scancode_game_events[SDL_SCANCODE_COUNT];
 char scancode_menu_events[SDL_SCANCODE_COUNT];
 
@@ -228,4 +230,47 @@ void sub_menu_event(GameState *gamestate, SDL_Event *event){
                 break;
         }
     }
+}
+
+void key_rebind_event(GameState *gamestate, SDL_Event *event){
+    short scancode_ev = scancode_menu_events[event->key.scancode];
+    Menu *ctrl_menu = get_current_submenu();
+    if (event->type == SDL_EVENT_KEY_UP){
+        if(scancode_ev == MENU_SELECT){
+            //lazy hack because tracking the immediate moment a key is pressed/released is additional work
+            //which is outside the scope of this project.
+            gamestate->input_locked = 0;
+        }
+    }
+     if(!gamestate->input_locked && event->type == SDL_EVENT_KEY_DOWN){
+        //TODO: make this work for both game & menu events properly...
+        char *events;
+        unsigned short *event_codes;
+        if(event_to_rebind < GAME_CMD_COUNT){
+            events = scancode_game_events;
+            event_codes = game_event_codes;
+        }
+        else{
+            events = scancode_menu_events;
+            event_codes = menu_event_codes;
+            event_to_rebind -= GAME_CMD_COUNT;
+        }
+        events[menu_event_codes[event_to_rebind]] = -1;
+        events[event->key.scancode] = event_to_rebind;
+        event_codes[event_to_rebind] = event->key.scancode;
+        menu_event_codes[event_to_rebind] = event->key.scancode;
+        ctrl_menu->item[ctrl_menu->current].rtext = SDL_GetScancodeName(event->key.scancode);
+
+        SDL_Log("key: %s, ev_id: %d\n", SDL_GetScancodeName(event->key.scancode), event_to_rebind);
+        event_to_rebind = -1;
+        gamestate->current_state->input = sub_menu_event; //dirty dirty dirty dirty dirty
+    }
+}
+
+void key_rebind(void *args){
+    event_to_rebind = *(char*)(((void**)(args))[0]);
+    GameState *gamestate = (GameState*)(((void**)(args))[1]);
+    gamestate->input_locked = 1;
+    gamestate->current_state->input = key_rebind_event;
+
 }
