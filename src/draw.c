@@ -105,6 +105,9 @@ void _draw_text(int x, int y, int w, int h, int orientation, char* content, SDL_
             dst.y = y + (((h / scale) - dst.h) / 2);
 
     SDL_RenderTexture(renderer, font_texture, NULL, &dst);
+    //TODO: refactor text. creating & nuking these is suboptimal, but if we don't we leak memory
+    SDL_DestroySurface(text);
+    SDL_DestroyTexture(font_texture);
 }
 
 void _draw_game_screen(GameState *gamestate){
