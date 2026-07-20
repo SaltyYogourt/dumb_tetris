@@ -23,7 +23,7 @@ typedef struct Menu {
     void (*up)(Menu *self);
     void (*down)(Menu *self);
     Menu *parent;
-    MenuElement item[];
+    MenuElement *item;
 } Menu;
 
 void up(Menu *self);

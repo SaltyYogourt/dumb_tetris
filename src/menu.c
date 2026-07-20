@@ -16,11 +16,19 @@ Menu controls_submenu = {
     .current = 0,
     .up = up,
     .down = down,
-    .item = { 
-        { .text = "PLACEHOLDER_CTRL", },
-        { .text = "PLACEHOLDER_CTRL", },
-    },
+    .item = NULL,
     .parent = NULL,
+};
+
+static MenuElement settings_items[] = {
+    { .text = "Controls", 
+        .click = enter_submenu,
+        .arg = &controls_submenu },
+    { .text = "PLACEHOLDER", },
+    { .text = "PLACEHOLDER", },
+    { .text = "PLACEHOLDER", },
+    { .text = "PLACEHOLDER", },
+    { .text = "PLACEHOLDER", },
 };
 
 Menu settings_submenu = {
@@ -28,17 +36,17 @@ Menu settings_submenu = {
     .current = 0,
     .up = up,
     .down = down,
-    .item = {
-        { .text = "Controls", 
-          .click = enter_submenu,
-          .arg = &controls_submenu },
-        { .text = "PLACEHOLDER", },
-        { .text = "PLACEHOLDER", },
-        { .text = "PLACEHOLDER", },
-        { .text = "PLACEHOLDER", },
-        { .text = "PLACEHOLDER", },
-    },
+    .item = settings_items,
     .parent = NULL,
+};
+
+static MenuElement gameover_items[] = { 
+    { .text = "Restart",
+        .click = menu_game_start,
+        .arg = NULL },
+    { .text = "Exit",
+        .click = pause_exit_to_menu,
+        .arg = NULL },
 };
 
 Menu gameover_menu = {
@@ -46,15 +54,20 @@ Menu gameover_menu = {
     .current = 0,
     .up = up,
     .down = down,
-    .item = { 
-        { .text = "Restart",
-            .click = menu_game_start,
-            .arg = NULL },
-        { .text = "Exit",
-            .click = pause_exit_to_menu,
-            .arg = NULL },
-    },
+    .item = gameover_items,
     .parent = NULL,
+};
+
+static MenuElement pause_items[] = { 
+    { .text = "Resume",
+        .click = pause_unpause,
+        .arg = NULL },
+    { .text = "Restart",
+        .click = pause_restart,
+        .arg = NULL },
+    { .text = "Exit",
+        .click = pause_exit_to_menu,
+        .arg = NULL },
 };
 
 Menu pause_menu = {
@@ -62,18 +75,19 @@ Menu pause_menu = {
     .current = 0,
     .up = up,
     .down = down,
-    .item = { 
-        { .text = "Resume",
-            .click = pause_unpause,
-            .arg = NULL },
-        { .text = "Restart",
-            .click = pause_restart,
-            .arg = NULL },
-        { .text = "Exit",
-            .click = pause_exit_to_menu,
-            .arg = NULL },
-    },
+    .item = pause_items,
     .parent = NULL,
+};
+
+static MenuElement main_menu_items[] = {
+    { .text = "Start",
+        .click = menu_game_start,
+        .arg = NULL },
+    { .text = "Online"},
+    { .text = "Settings",
+        .click = enter_submenu,
+        .arg = &settings_submenu },
+    { .text = "Exit", },
 };
 
 Menu main_menu = {
@@ -81,16 +95,7 @@ Menu main_menu = {
     .current = 0,
     .up = up,
     .down = down,
-    .item = { 
-        { .text = "Start",
-            .click = menu_game_start,
-            .arg = NULL },
-        { .text = "Online"},
-        { .text = "Settings",
-          .click = enter_submenu,
-          .arg = &settings_submenu },
-        { .text = "Exit", },
-    },
+    .item = main_menu_items,
     .parent = NULL,
 };
 
