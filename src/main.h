@@ -22,6 +22,7 @@ unsigned int get_lines(GameState *gamestate, unsigned int *lines);
 unsigned char get_random_tetromino(unsigned char history[4]);
 void push_history(unsigned char idx, unsigned char history[4]);
 void collapse_line(GameState *gamestate, int line);
+void add_line(GameState *gamestate, int line_count);
 void reset_delay(GameState *gamestate);
 void lock_piece(GameState *gamestate);
 void hard_drop(GameState *gamestate, bool sonicdrop);
