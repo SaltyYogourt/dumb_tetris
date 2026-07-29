@@ -391,6 +391,33 @@ unsigned int get_lines(GameState *gamestate, unsigned int *lines){
     return line_count;
 }
 
+void add_line(GameState *gamestate, int line_count){
+    const char block_clr = 3; //placeholder
+    const char empty_pos = BOARD_WIDTH-1;
+
+    char placeholder = T_EMPTY;
+    bool is_gameover = false;
+    bool bottom = false;
+
+    for(int i = 0; BOARD_HEIGHT-1 >= i; ++i){
+        if(BOARD_HEIGHT-i <= line_count){
+            bottom = true;
+        }
+        for(int j = BOARD_WIDTH-1; j >= 0; --j){
+            placeholder = gamestate->board[i][j]; 
+            if(i-line_count < 0){
+                if(placeholder != T_EMPTY)
+                    is_gameover = true;
+                continue;
+            }
+            gamestate->board[i][j] = (bottom && j != empty_pos) ? block_clr : T_EMPTY; 
+            gamestate->board[i-line_count][j] = placeholder; 
+        }
+    }
+    if(is_gameover)
+        gameover(gamestate);
+}
+
 void collapse_line(GameState *gamestate, int line){
     unsigned char block;
     for(int i = line; i >= 0; --i){
