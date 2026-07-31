@@ -49,7 +49,7 @@ static CornerDisplay held_tetromino_corner_display;
 
 //static 
 static SDL_Color font_color = { .r = 224, .g = 224, .b = 224, .a = 255 };
-static SDL_Color tetromino_color_table[7]; //seven beers are all I need...
+static SDL_Color tetromino_color_table[T_SPECIAL_BOUND];
 
 void draw_init(GameState *gamestate){
     TTF_Init();
@@ -65,11 +65,13 @@ void draw_init(GameState *gamestate){
     //font shit here
 
     //init color table
-    for(int x = 0; 7 > x; ++x){
+    for(int x = 0; T_COUNT > x; ++x){
         SDL_Color *dst_color = &tetromino_color_table[x];
         SDL_Color *src_color = &gamestate->piece_data[x].color;
         SDL_memcpy(dst_color, src_color, sizeof(SDL_Color));
     }
+    //special stuff
+    tetromino_color_table[T_GRAY] = (SDL_Color){192,192,192};
 }
 
 void debug_gravity(GameState *gamestate){
