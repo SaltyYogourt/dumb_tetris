@@ -258,7 +258,7 @@ void new_tetromino(GameState *gamestate, int id, int height){
 unsigned char get_random_tetromino(unsigned char history[4]){
     int i,j,piece_idx;
     for(i = 0; TETROMINO_RAND_RETRIES > i; ++i){
-        piece_idx = SDL_rand(TETROMINO_COUNT);
+        piece_idx = SDL_rand(T_COUNT);
         for(j = 0; TETROMINO_HISTORY_LEN > j; ++j){
             if(piece_idx == history[j]) break;
             else if(j == TETROMINO_HISTORY_LEN-1) return piece_idx;
@@ -392,7 +392,8 @@ unsigned int get_lines(GameState *gamestate, unsigned int *lines){
 }
 
 void add_line(GameState *gamestate, int line_count){
-    const char block_clr = 3; //placeholder
+    const char block_clr = T_GRAY+1; //remember, color table is 1 behind piece value table.
+                                     //0 is empty/sentinel... bad decision in hindsight? idk
     const char empty_pos = BOARD_WIDTH-1;
 
     char placeholder = T_EMPTY;
