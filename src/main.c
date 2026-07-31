@@ -393,7 +393,6 @@ unsigned int get_lines(GameState *gamestate, unsigned int *lines){
 
 void add_line(GameState *gamestate, int line_count){
     const char block_clr = T_GRAY+1; //remember, color table is 1 behind piece value table.
-                                     //0 is empty/sentinel... bad decision in hindsight? idk
     const char empty_pos = BOARD_WIDTH-1;
 
     char placeholder = T_EMPTY;
