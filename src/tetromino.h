@@ -3,9 +3,21 @@
 
 #include "game.h"
 
-#define TETROMINO_COUNT 7
+enum { 
+    T_I,
+    T_O,
+    T_T,
+    T_J,
+    T_L,
+    T_S,
+    T_Z,
+    T_COUNT,
+};
 
-enum { T_I, T_O, T_T, T_J, T_L, T_S, T_Z };
+enum {
+    T_GRAY = T_COUNT, //start at T_COUNT end.
+    T_SPECIAL_BOUND,
+};
 
 enum { 
     T_BOUND_BELOW      = ( 1 << 0 ),

@@ -41,6 +41,8 @@ void default_events(){
     MAP_GAME_KEY(SDL_SCANCODE_R,GAME_DEBUG_RESET_GRAVITY);
     MAP_GAME_KEY(SDL_SCANCODE_1,GAME_DEBUG_INCREASE_GRAVITY);
     MAP_GAME_KEY(SDL_SCANCODE_2,GAME_DEBUG_DECREASE_GRAVITY);
+    MAP_GAME_KEY(SDL_SCANCODE_3,GAME_DEBUG_ADD_LINE);
+    MAP_GAME_KEY(SDL_SCANCODE_4,GAME_DEBUG_ADD_MORE_LINES);
 #endif
 
     MAP_MENU_KEY(SDL_SCANCODE_UP,MENU_UP);
@@ -93,6 +95,12 @@ void gameplay_event(GameState *gamestate, SDL_Event *event){
             case GAME_DEBUG_RESET_GRAVITY:
                 gamestate->player.y = 3;
                 gamestate->gravity_step = 0.0f;
+                break;
+            case GAME_DEBUG_ADD_LINE:
+                add_line(gamestate, 1, BOARD_WIDTH-1);
+                break;
+            case GAME_DEBUG_ADD_MORE_LINES:
+                add_line(gamestate, 3, 0);
                 break;
 #endif
             default:

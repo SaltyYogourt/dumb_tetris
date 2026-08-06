@@ -258,7 +258,7 @@ void new_tetromino(GameState *gamestate, int id, int height){
 unsigned char get_random_tetromino(unsigned char history[4]){
     int i,j,piece_idx;
     for(i = 0; TETROMINO_RAND_RETRIES > i; ++i){
-        piece_idx = SDL_rand(TETROMINO_COUNT);
+        piece_idx = SDL_rand(T_COUNT);
         for(j = 0; TETROMINO_HISTORY_LEN > j; ++j){
             if(piece_idx == history[j]) break;
             else if(j == TETROMINO_HISTORY_LEN-1) return piece_idx;
@@ -389,6 +389,33 @@ unsigned int get_lines(GameState *gamestate, unsigned int *lines){
         }
     }
     return line_count;
+}
+
+void add_line(GameState *gamestate, int line_count, int hollow_pos){
+    const char block_clr = T_GRAY+1; //remember, color table is 1 behind piece value table.
+    const char empty_pos = hollow_pos > BOARD_WIDTH-1 ? BOARD_WIDTH-1 : hollow_pos;
+
+    char placeholder = T_EMPTY;
+    bool is_gameover = false;
+    bool bottom = false;
+
+    for(int i = 0; BOARD_HEIGHT-1 >= i; ++i){
+        if(BOARD_HEIGHT-i <= line_count){
+            bottom = true;
+        }
+        for(int j = BOARD_WIDTH-1; j >= 0; --j){
+            placeholder = gamestate->board[i][j]; 
+            if(i-line_count < 0){
+                if(placeholder != T_EMPTY)
+                    is_gameover = true;
+                continue;
+            }
+            gamestate->board[i][j] = (bottom && j != empty_pos) ? block_clr : T_EMPTY; 
+            gamestate->board[i-line_count][j] = placeholder; 
+        }
+    }
+    if(is_gameover)
+        gameover(gamestate);
 }
 
 void collapse_line(GameState *gamestate, int line){

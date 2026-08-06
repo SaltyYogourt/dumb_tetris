@@ -24,6 +24,8 @@ enum KeyCommandsGame : char {
     GAME_DEBUG_RESET_GRAVITY,
     GAME_DEBUG_INCREASE_GRAVITY,
     GAME_DEBUG_DECREASE_GRAVITY,
+    GAME_DEBUG_ADD_LINE,
+    GAME_DEBUG_ADD_MORE_LINES,
 #endif
     GAME_CMD_COUNT //number of commands for array bound reasons, never use
 };
