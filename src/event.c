@@ -97,10 +97,10 @@ void gameplay_event(GameState *gamestate, SDL_Event *event){
                 gamestate->gravity_step = 0.0f;
                 break;
             case GAME_DEBUG_ADD_LINE:
-                add_line(gamestate, 1);
+                add_line(gamestate, 1, BOARD_WIDTH-1);
                 break;
             case GAME_DEBUG_ADD_MORE_LINES:
-                add_line(gamestate, 3);
+                add_line(gamestate, 3, 0);
                 break;
 #endif
             default:

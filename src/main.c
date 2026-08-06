@@ -391,9 +391,9 @@ unsigned int get_lines(GameState *gamestate, unsigned int *lines){
     return line_count;
 }
 
-void add_line(GameState *gamestate, int line_count){
+void add_line(GameState *gamestate, int line_count, int hollow_pos){
     const char block_clr = T_GRAY+1; //remember, color table is 1 behind piece value table.
-    const char empty_pos = BOARD_WIDTH-1;
+    const char empty_pos = hollow_pos > BOARD_WIDTH-1 ? BOARD_WIDTH-1 : hollow_pos;
 
     char placeholder = T_EMPTY;
     bool is_gameover = false;
