@@ -61,14 +61,16 @@ void game_start(GameState *gamestate){
     menu_states[STATE_MENU_MAIN].update = pause_loop; 
     menu_states[STATE_MENU_MAIN].render = draw_main_menu;
     menu_states[STATE_MENU_MAIN].input = game_menu_event;
-    menu_states[STATE_MENU_MAIN].enter = enter_exit_placeholder;
-    menu_states[STATE_MENU_MAIN].exit = enter_exit_placeholder;
+    menu_states[STATE_MENU_MAIN].enter = enter_menu;
+    menu_states[STATE_MENU_MAIN].exit = exit_menu;
 
     menu_states[STATE_MENU_SUB].update = pause_loop; 
     menu_states[STATE_MENU_SUB].render = draw_sub_menu;
     menu_states[STATE_MENU_SUB].input = sub_menu_event;
     menu_states[STATE_MENU_SUB].enter = enter_exit_placeholder;
     menu_states[STATE_MENU_SUB].exit = enter_exit_placeholder;
+
+    default_events();
 }
 
 void game_init(GameState *gamestate){
@@ -304,6 +306,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     game_init(gamestate);
     draw_init(gamestate);
 
+    gamestate->current_state->enter(gamestate);
     return SDL_APP_CONTINUE;  
 }
 
