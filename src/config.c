@@ -37,6 +37,20 @@ int read_config(){
         if(newline){
             *newline = 0; 
         }
+        
+        char *first_char = trim(config_file);
+        SDL_Log("%c", *first_char);
+        if(*first_char == '['){
+            first_char++;
+            char *end = SDL_strchr(first_char, ']');
+            if(!end) {
+                //ERROR HANDLE HERE
+                return 1;
+            }
+            *end = 0;
+            char *section = trim(first_char);
+            SDL_Log("section: %s", section);            
+        }
 
         char *val = SDL_strchr(config_file, '=');
         char *key = config_file;
