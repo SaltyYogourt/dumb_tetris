@@ -57,6 +57,8 @@ void load_controls_buttons(MenuElement *items, unsigned int *current_button){
     items[GAME_DEBUG_RESET_GRAVITY].text = "DEBUG: Reset Gravity";
     items[GAME_DEBUG_INCREASE_GRAVITY].text = "DEBUG: Increase Gravity";
     items[GAME_DEBUG_DECREASE_GRAVITY].text = "DEBUG: Decrease Gravity";
+    items[GAME_DEBUG_ADD_LINE].text = "DEBUG: Add 1 Line";
+    items[GAME_DEBUG_ADD_MORE_LINES].text = "DEBUG: Add 4 Lines";
 
     items[GAME_CMD_COUNT+MENU_UP].text = "Menu Up";
     items[GAME_CMD_COUNT+MENU_DOWN].text = "Menu Down";
